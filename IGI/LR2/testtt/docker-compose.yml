@@ -1,0 +1,39 @@
+
+
+services:
+  php:
+    build: ./php
+    ports:
+      - 8081:80
+    networks:
+      - my_network
+  db:
+    image: mysql 
+    restart: always
+    environment:
+      MYSQL_USER: user
+      MYSQL_PASSWORD: 54321
+      MYSQL_ROOT_PASSWORD: 12345
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - my_network
+
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      - PMA_ARBITRARY=1
+    networks:
+      - my_network
+
+volumes:
+  db-data:
+
+networks:
+  my_network:
+    driver: bridge
+
+
