@@ -1,0 +1,7 @@
+total_sentences: 7
+declarative: 5
+interrogative: 1
+imperative: 1
+avg_sentence_length: 13.571428571428571
+avg_word_length: 5.336842105263158
+smileys: 2
