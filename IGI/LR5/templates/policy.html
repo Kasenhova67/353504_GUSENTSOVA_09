@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    {% if weather_data %}
+        <div class="weather-widget" style="margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+            <h2>Погода в {{ weather_data.city }}</h2>
+            <div style="display: flex; align-items: center;">
+                <img src="https://openweathermap.org/img/wn/{{ weather_data.icon }}@2x.png" 
+                     alt="{{ weather_data.description }}" width="60">
+                <div style="margin-left: 15px;">
+                    <p style="font-size: 24px; margin: 0;">{{ weather_data.temp }}°C</p>
+                    <p style="text-transform: capitalize;">{{ weather_data.description }}</p>
+                </div>
+            </div>
+            <div style="margin-top: 10px;">
+                <p>Влажность: {{ weather_data.humidity }}%</p>
+                <p>Ветер: {{ weather_data.wind }} м/с</p>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

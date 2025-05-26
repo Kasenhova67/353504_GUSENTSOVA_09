@@ -1,0 +1,43 @@
+{% extends 'layout.html'  %}
+
+{% block title %}
+    Museum
+{% endblock %}
+
+{% block content %}
+    <div class="features" style="float: left;">
+        <h1>Museum</h1>
+        <form>
+            {% if user.is_superuser %}
+            <input type="checkbox" id="show_recent_exhibits" name="show_recent_exhibits" {% if show_recent_exhibits %}checked{% endif %}>
+            <label for="show_recent_exhibits">Show only exhibits added in the last 6 months</label>
+            <button type="submit">Apply</button>
+            {%endif%}
+        </form>
+        {% for hal in halls %}
+            <h2> Hall - {{hal.name}}</h2>
+            <p> Nomer: {{hal.nomer}}  Floor: {{hal.flor}}  Square: {{hal.square}}</p>
+            <h3> Exhibits in hall: </h3>
+            {% for el in exhibits %}
+                {% if el.hall.name == hal.name %}
+                    {% if not show_recent_exhibits or el.date >= main_date %}
+                        <img src="{{ el.image_source.url }}" width="200"/>
+                        <p> Name: {{el.name}}  Art: {{el.art}} Keeper: {{el.keeper}}</p>
+                        {% if user.is_superuser %}
+                            <p>Receipt date: {{el.date}}</p>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            {% if user.is_superuser %}
+            <h4> Employees in hall: </h4>
+            {% for el in employees %}
+                {% if el.hall.name == hal.name %}
+                    <img src="{{ el.image_source.url }}" width="200"/>
+                    <p> Name: {{el.user.username}}  Job: {{el.job}}  Email: {{el.user.email}}</p>
+                {% endif %}
+            {% endfor %}
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <h1>Personal info</h1>
+    <p>Lastname: {{ current_user.user.last_name }}</p>
+    <p>Firstname: {{ current_user.user.first_name }}</p>
+    <p>Email: {{ current_user.user.email }}</p>
+
+    {% if user.is_staff %}
+        <img src="{{ current_user.image_source.url }}" alt="Profile image" width="200"/>
+    {% endif %}
+
+    <h2>Timezone data</h2>
+    <p>User timezone: {{ user_timezone }}</p>
+    <p>User time: {{ current_date_formatted }}</p>
+    <pre>Calendar: {{ calendar_text }}</pre>
+    <p>UTC: {{ utc_time }}</p>
+    {% if user.is_staff %}
+
+        <h2>My exhibits</h2>
+        {% for exhibit in exhibit_for_employee %}
+            <p> Exhibit's name: {{ exhibit.name }}</p>
+            <p>Exhibit date: {{ exhibit.date }}</p>
+            <p>Exhibit art: {{ exhibit.art }}</p>
+            <p>Exhibit's hall: {{ exhibit.hall }}</p>
+            <p>Exhibit art: <img src="{{ exhibit.image_source.url }}" width="200"/></p>
+        {% endfor %}
+    {% endif %}
+
+    <h2>My exhibitions</h2>
+
+    {% if user.is_staff %}
+        {% for exhibition in exhibition_for_employee %}
+            <p>Exhibition's name: {{ exhibition.name }}</p>
+            <p>Exhibition date: {{ exhibition.date }}</p>
+            <p>Exhibition code: {{ exhibition.code }}</p>
+            <p>Exhibition's hall: {{ exhibition.hall }}</p>
+        {% endfor %}
+    {%endif%}
+
+    {% if not user.is_staff %}
+        <a href="{% url 'add_order' %}">Add order</a>
+    {% endif %}
+    {% if not user.is_staff %}
+    {% for order in orders %}
+        <div>
+            <p>Order id: {{ order.pk }}</p>
+            <p>Order exhibition name: {{ order.exhibitions.name }}</p>
+            <p>Order total price: {{ order.get_total_price }}</p>
+            <a href="{{ order.get_absolute_url_to_more_info }}">More info about order</a>
+        </div>
+    {% endfor %}
+    {% endif %}
+
+{% endblock %}

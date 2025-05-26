@@ -1,0 +1,29 @@
+{% extends 'layout.html'  %}
+
+{% block title %}
+    About us
+{% endblock %}
+
+{% block content %}
+        <div class="features" >
+        <h1>About us</h1>
+        <p>Good Company</p>
+
+    {% if user.is_staff %}
+        <h1>Company statistics</h1>
+        <p>Client age median: {{ client_age_median }}</p>
+        <p>Client age mean: {{ client_age_mean }}</p>
+        <p>Client age mode: {{ client_age_mode }}</p>
+        <p>The highest price of the ticket: {{ get_order_with_highest_price }}</p>
+        <p>The most popular exhibition: {{ get_most_popular_exhibition }}</p>
+        <img src="data:image/png;base64,{{ histogram_url }}" alt="Service Type Histogram">
+
+        {% for client in clients_with_order_count %}
+            <h2>Client email: {{ client.user.email }}. Number of orders: {{ client.order_count }}</h2>
+            {% for order in client.order_set.all %}
+                <p>Order id: {{ order.id }}. Order date: {{ order.date_time }}. Total price: {{ order.get_total_price }}</p>
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+            </div>
+{% endblock %}

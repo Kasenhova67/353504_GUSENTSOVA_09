@@ -1,0 +1,100 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Exhibitions
+{% endblock %}
+
+{% block content %}
+    {% if user.is_superuser %}
+        <h2>Add new exhibition</h2>
+        <li><a href="{% url 'add_exhibition' %}">Add exhibition</a></li>
+    {% endif %}
+
+    <div class="features">
+        <h1>Exhibitions</h1>
+
+        
+        <div class="search-sort-container" style="margin-bottom: 20px;">
+            <form method="get" action="{% url 'exhibitions' %}" class="search-form">
+                <input type="text" name="search" placeholder="Search exhibitions..." value="{{ request.GET.search }}">
+                <button type="submit">Search</button>
+            </form>
+
+            <div class="sort-options" style="margin-top: 10px;">
+                <span>Sort by:</span>
+                <a href="?sort=name{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+                   class="{% if request.GET.sort == 'name' %}active-sort{% endif %}">Name</a>
+                <a href="?sort=date{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+                   class="{% if request.GET.sort == 'date' %}active-sort{% endif %}">Date</a>
+                <a href="?sort=cost{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+                   class="{% if request.GET.sort == 'cost' %}active-sort{% endif %}">Cost</a>
+                <a href="?sort=people{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+                   class="{% if request.GET.sort == 'people' %}active-sort{% endif %}">Visitors</a>
+            </div>
+        </div>
+
+        {% if user.is_authenticated %}
+            {% if not user.is_superuser and not user.is_staff %}
+                <button><a href="{% url 'add_order' %}">About</a></button>
+            {% endif %}
+        {% endif %}
+
+        {% if exhibitions %}
+            <div class="exhibitions-list">
+                {% for el in exhibitions %}
+                    <div class="exhibition-item" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+                        <h2>Name: {{ el.name }}</h2>
+                        <p>Date: {{ el.date|date:"d.m.Y H:i" }}</p>
+                        <p>Size of Group: {{ el.people }}</p>
+                        <p>Cost: {{ el.cost }}</p>
+                        <p>Hall: {{ el.hall.name }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No exhibitions found matching your criteria.</p>
+        {% endif %}
+    </div>
+
+    <style>
+        .search-form input {
+            padding: 8px;
+            width: 300px;
+            margin-right: 10px;
+        }
+        
+        .search-form button {
+            padding: 8px 15px;
+            background-color:  #ffcf2f;
+            color: #201109;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .sort-options a {
+            margin-left: 10px;
+            padding: 5px 10px;
+            text-decoration: none;
+            background-color: #f1f1f1;
+            color: #333;
+            border-radius: 3px;
+        }
+        
+        .sort-options a:hover {
+            background-color: #ddd;
+        }
+        
+        .sort-options a.active-sort {
+            background-color:  #ffcf2f;
+            color: #201109;
+        }
+        
+        .exhibition-item {
+            transition: all 0.3s ease;
+        }
+        
+        .exhibition-item:hover {
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    </style>
+{% endblock %}

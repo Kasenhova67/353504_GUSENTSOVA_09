@@ -1,0 +1,113 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}  {% endblock %}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: white;
+        }
+        header {
+            padding: 1rem;
+            background-color: #201109; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .name {
+            font-size: 24px;
+            color: #ffcf2f; 
+            font-weight: bold;
+        }
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        nav li {
+            margin-right: 1rem;
+        }
+        nav a {
+            color: #ffcf2f; 
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        nav a:hover {
+            color: #ffffff; 
+        }
+        main {
+            padding: 2rem;
+            background-color: white;
+            min-height: 80vh;
+        }
+        /* Стили для кнопок входа/выхода */
+        .auth-links a {
+            color: #ecf0f1;
+            margin-left: 10px;
+            text-decoration: none;
+        }
+        .auth-links a:hover {
+            color: #ffcf2f;
+        }
+        .separator {
+            color: #bdc3c7;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <span class="name">Museum</span>
+        <nav>
+            <ul>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'museum' %}">Museum</a></li>
+                <li><a href="{% url 'exhibitions' %}">Exhibitions</a></li>
+                <li><a href="{% url 'about' %}">About us</a></li>
+                <li><a href="{% url 'news' %}">News</a></li>
+                <li><a href="{% url 'contacts' %}">Contacts</a></li>
+                <li><a href="{% url 'dictionary' %}">Questions</a></li>
+                <li><a href="{% url 'policy' %}">Privacy Policy</a></li>
+                <li><a href="{% url 'vacancies' %}">Vacancies</a></li>
+                <li><a href="{% url 'reviews' %}">Reviews</a></li>
+                <li><a href="{% url 'discounts' %}">Promotional codes and coupons</a></li>
+                {% if user.is_staff %}
+                    <li><a href="{% url 'employee_positions' %}">Employee positions</a></li>
+                    <li><a href="{% url 'employees' %}">Employees</a></li>
+                {% endif %}
+                {% if user.is_superuser %}
+                    <li><a href="{% url 'clients' %}">Clients</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        <div class="auth-links">
+            {% if user.is_authenticated %}
+                {% if not user.is_superuser %}
+                    {% if user.is_staff %}
+                        <a href="{% url 'employee_profile' %}">Profile</a>
+                    {% else %}
+                        <a href="{% url 'client_profile' %}">Profile</a>
+                    {% endif %}
+                {% endif %}
+                <a href="{% url 'logout' %}">Log out</a>
+            {% else %}
+                <a href="{% url 'login' %}">Log in</a>
+                <span class="separator">|</span>
+                <a href="{% url 'register' %}">Sign up</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <h1>Our vacancies</h1>
+    
+    {% if user.is_superuser%}
+        <h2>Add new vacancy</h2>
+        <li><a href="{% url 'add_vacancy' %}">Add vacancy</a></li>
+    {% endif %}
+    
+    {% for vacancy in vacancies %}
+        <h2>{{ vacancy.employee_position.name }}</h2>
+        <p>Number of this position: {{ vacancy.number_of_this_position }}</p>
+        <p>{{ vacancy.vacancy_description }}</p>
+        {% if perms.vacancy.add_vacancy %}
+            <a href="{{ vacancy.get_absolute_url_for_delete }}">Delete</a>
+            <a href="{{ vacancy.get_absolute_url_for_update}}">Update</a>
+        {% endif %}
+    {% endfor %}
+{% endblock %}

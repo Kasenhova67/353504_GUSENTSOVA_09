@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    {% if not user.is_staff and not user.is_superuser %}
+        <h2>Add new question</h2>
+        <li><a href="{% url 'add_question' %}">Add question</a></li>
+    {% endif %}
+    
+    {% for question in questions %}
+        <div>
+            <p>Question: {{ question.content }}</p>
+            <p>{{ question.date }}</p>
+            {% if question.answer %}
+                <p>Answer: {{ question.answer.content }}</p>
+                <p>{{ question.answer.date }}</p>
+            {% else %}
+                {% if user.is_staff %}
+                    <a href="{{ question.get_absolute_url_to_add }}">Add answer</a>
+                {% endif %}
+            {% endif %}
+        </div>
+    {% endfor %}
+{% endblock %}
