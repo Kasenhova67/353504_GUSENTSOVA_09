@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    {% if not user.is_staff and not user.is_superuser %}
+        <h2>Add new question</h2>
+        <li><a href="{% url 'add_question' %}">Add question</a></li>
+    {% endif %}
+    
+    {% for question in questions %}
+        <div>
+            <p><strong>Question:</strong> {{ question.content }}</p>
+            <p><small>{{ question.date }}</small></p>
+            
+            {% if question.answer %}
+              
+                <details>
+                    <summary>Посмотреть ответ</summary>
+                    <div>
+                        <p><strong>Answer:</strong> {{ question.answer.content }}</p>
+                        <p><small>{{ question.answer.date }}</small></p>
+                    </div>
+                </details>
+            {% else %}
+                {% if user.is_staff %}
+                    <a href="{{ question.get_absolute_url_to_add }}">Add answer</a>
+                {% else %}
+                    <p><em>Ответ пока не добавлен</em></p>
+                {% endif %}
+            {% endif %}
+        </div>
+        <hr>
+    {% endfor %}
+{% endblock %}

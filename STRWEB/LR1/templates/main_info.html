@@ -1,0 +1,78 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}
+    Main Page
+{% endblock %}
+
+{% block content %}
+
+<div class="banner-container" style="margin: 20px 0; text-align: center;">
+    <span class="name" style="display: block; color: rgb(30, 18, 0); font-size: 24px; font-weight: bold; margin-bottom: 20px;">Banners</span>
+    <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 20px;">
+        <img src="/media/images/banner2.png" alt="Promo Banner" style="max-width: 48%; height: auto; border-radius: 10px;">
+        <img src="/media/images/banner3.png" alt="Promo Banner2" style="max-width: 48%; height: auto; border-radius: 10px;">
+    </div>
+    <div style="display: flex; justify-content: center;">
+        <img src="/media/images/logo1.png" alt="Promo Banner3" style="max-width: 100%; height: auto; border-radius: 10px;">
+    </div>
+</div>
+
+    {% if user.is_authenticated %}
+        <h2>Random Cat Fact:</h2>
+        <p>{{ cat_fact }}</p>
+    {% endif %}
+
+    <div class="features">
+        <h1>Main Page</h1>
+        
+        <section class="catalog" style="margin: 30px 0;">
+            <h2>Our Services</h2>
+            <div class="services-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                {% for exhibition in exhibitions|slice:":6" %}
+                <div class="service-card" style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3>{{ exhibition.name }}</h3>
+                    <p>Hall: {{ exhibition.hall.name }}</p>
+                    <p>Date: {{ exhibition.date|date:"M d, Y" }}</p>
+                    <p>Cost: ${{ exhibition.cost }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="latest-article" style="margin: 30px 0;">
+            <h2>Latest Article</h2>
+            {% if latest_news %}
+            <div class="article-card" style="border: 1px solid #ddd; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <h3>{{ latest_news.title }}</h3>
+                <p>{{ latest_news.content|truncatewords:50 }}</p>
+                <p><small>Published: {{ latest_news.date|date:"M d, Y" }}</small></p>
+                {% if latest_news.image_source %}
+                <img src="{{ latest_news.image_source.url }}" alt="News image" style="max-width: 100%; margin-top: 10px;"/>
+                {% endif %}
+                <div style="margin-top: 15px;">
+                    <a href="{% url 'news' %}" style="display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px;">Read More</a>
+                </div>
+            </div>
+            {% else %}
+            <p>No articles available.</p>
+            {% endif %}
+        </section>
+
+        <section class="partners" style="margin: 30px 0;">
+            <h2>Our Partners</h2>
+            <div class="partners-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; align-items: center;">
+                {% for company in partners %}
+                <div class="partner-card" style="text-align: center;">
+                    <a href="{{ company.website }}" target="_blank">
+                        <img src="{{ company.logo.url }}" alt="{{ company.name }} Logo" width="100" height="100" style="object-fit: contain;">
+                    </a>
+                    <p style="margin-top: 10px;">{{ company.name }}</p>
+                </div>
+                {% empty %}
+                <p>No partners available.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+{% endblock %}

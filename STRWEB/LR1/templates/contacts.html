@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <h1>Our contacts</h1>
+    
+    {% for employee in employees %}
+        <div>
+            <h2>Employee name: {{ employee.user.last_name }} {{ employee.user.first_name }}</h2>
+            <p>Employee position: {{ employee.job.name }}</p>
+            <p>Employee telephone: {{ employee.user.telephone }}</p>
+            <p>Employee email: {{ employee.user.email }}</p>
+            <p><img src="{{ employee.image_source.url }}" alt="Employee image" width="200"/></p>
+        </div>
+    {% endfor %}
+{% endblock %}

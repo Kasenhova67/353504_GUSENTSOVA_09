@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h1>Your order details</h1>
+    <p>Order id: {{ order.pk }}</p>
+    <p>Order price: {{ order.get_total_price }}</p>
+    {% for exhibition in exhibitions %}
+        <p>Exhibition name: {{ exhibition.name }}</p>
+        <p>Date of the exhibition: {{ exhibition.date }}</p>
+        <p>Code of the exhibition: {{ exhibition.code }}</p>
+    {% endfor %}
+{% endblock %}

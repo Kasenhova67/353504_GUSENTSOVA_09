@@ -1,0 +1,491 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Latest news and updates from National Art Museum - exhibitions, events, and cultural programs">
+<meta name="keywords" content="museum, art, exhibitions, news, cultural events, art gallery">
+<meta name="author" content="National Art Museum">
+<title>Museum News - National Art Museum</title>
+
+<!-- Основная favicon -->
+<link rel="icon" type="image/x-icon" href="/media/images/favicon.ico">
+
+<!-- PNG иконки для современных браузеров -->
+<link rel="icon" type="image/png" sizes="16x16" href="/media/images/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/media/images/favicon-32x32.png">
+
+<!-- Apple Touch Icon -->
+<link rel="apple-touch-icon" sizes="180x180" href="/media/images/apple-touch-icon.png">
+
+<!-- Для Android -->
+<link rel="icon" type="image/png" sizes="192x192" href="/media/images/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/media/images/android-chrome-512x512.png">
+
+<!-- Web App Manifest -->
+<link rel="manifest" href="/media/images/site.webmanifest">
+
+<!-- Для Windows 8/10 -->
+<meta name="msapplication-TileImage" content="/media/images/android-chrome-144x144.png">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="theme-color" content="#ffffff">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "headline": "Museum News and Updates",
+  "datePublished": "2023-01-01T00:00:00+03:00",
+  "dateModified": "2023-01-01T00:00:00+03:00",
+  "author": {
+    "@type": "Organization",
+    "name": "National Art Museum"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "National Art Museum",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "/media/images/logo02.png"
+    }
+  },
+  "description": "Latest news and exhibitions from National Art Museum",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://museum.com/news"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="news-container" itemscope itemtype="https://schema.org/WebPage">
+   
+  
+    <nav class="horizontal-nav" aria-label="Main navigation">
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/exhibitions" data-page="exhibitions">Exhibitions</a></li>
+            <li><a href="/about" data-page="about">About</a></li>
+        </ul>
+    </nav>
+
+    <header class="news-header">
+        <h1 itemprop="headline">Museum News</h1>
+        <p>Latest updates and events from our museum</p>
+    </header>
+
+    <div class="news-layout">
+        <nav class="vertical-nav" aria-label="News categories and archive">
+            <h2>News Categories</h2>
+            <ul>
+                <li><a href="#exhibitions" class="nav-link">Exhibitions</a></li>
+                <li><a href="#events" class="nav-link">Events</a></li>
+                <li><a href="#education" class="nav-link">Education</a></li>
+                <li><a href="#collections" class="nav-link">Collections</a></li>
+                <li><a href="#research" class="nav-link">Research</a></li>
+                <li><a href="#conservation" class="nav-link">Conservation</a></li>
+            </ul>
+            
+            <h2>Archive</h2>
+            <ol> 
+                <li><a href="#2023" class="nav-link">2023</a></li>
+                <li><a href="#2022" class="nav-link">2022</a></li>
+                <li><a href="#2021" class="nav-link">2021</a></li>
+                <li><a href="#2020" class="nav-link">2020</a></li>
+            </ol>
+        </nav>
+
+        <section class="news-content">
+            <h2 class="visually-hidden">News articles</h2>
+           
+                    <p>This is <strong>very important information</strong> about the exhibition. 
+                       We <em>strongly recommend</em> booking tickets in advance. 
+                       Don't miss this <mark>unique opportunity</mark> to see rare artworks.</p>
+
+                    <blockquote cite="https://www.example.com/degas-quotes">
+                        <p>"Art is not what you see, but what you make others see."</p>
+                        <footer>— <cite>Edgar Degas</cite></footer>
+                    </blockquote>
+
+                    <p>The <abbr title="Museum of Modern Art" itemprop="publisher">MOMA</abbr> exhibition opens next week.</p>
+
+                    <dl>
+                        <dt>Vernissage</dt>
+                        <dd>A private viewing of artworks before the public opening</dd>
+                        
+                        <dt>Curator</dt>
+                        <dd>A person who selects and organizes artworks for exhibition</dd>
+                    </dl>
+
+                    <pre><code class="language-javascript">
+// Museum opening hours function
+function getOpeningHours(day) {
+    switch(day) {
+        case 'Monday': return 'Closed';
+        case 'Tuesday': return '10:00-18:00';
+        default: return '09:00-20:00';
+    }
+}
+
+// Example usage
+const hours = getOpeningHours('Wednesday');
+console.log(hours); // Output: 09:00-20:00
+                    </code></pre>
+
+                    <pre class="poem" translate="no">
+The art hangs still
+Upon the wall,
+Silent and patient
+Waiting for all.
+                    </pre>
+
+                    <p class="multiline-text">
+                        The exhibition features works from the Renaissance period,<br>
+                        including rare paintings and sculptures that haven't been<br>
+                        displayed together in over a century. Visitors will have<br>
+                        the unique opportunity to experience these masterpieces.
+                    </p>
+
+            {% for news_info in news %}
+            <article class="news-card" id="news-{{ forloop.counter0 }}" itemprop="mainEntity" itemscope itemtype="https://schema.org/Article">
+                <figure class="news-image-container">
+                    {% if news_info.image_source and news_info.image_source.url %}
+                    <img src="{{ news_info.image_source.url }}" 
+                         alt="{{ news_info.title|default:'Museum news image' }}"
+                         srcset="{{ news_info.image_source.url }} 1200w"
+                         sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                         width="300" 
+                         height="200"
+                         loading="lazy"
+                         itemprop="image">
+                    {% endif %}
+                    <figcaption>Image: {{ news_info.title|default:'News image' }}</figcaption>
+                </figure>
+
+                <section class="news-content">
+                    <h3 itemprop="headline">{{ news_info.title|default:'Untitled News' }}</h3>                
+                   
+                    <div class="news-meta">
+                        {% if news_info.date %}
+                        <time datetime="{{ news_info.date|date:'Y-m-d' }}" itemprop="datePublished">
+                            📅 {{ news_info.date|date:"F j, Y" }}
+                        </time>
+                        {% endif %}
+                        <span itemprop="author" itemscope itemtype="https://schema.org/Person">
+                            By <span itemprop="name">Museum Staff</span>
+                        </span>
+                    </div>
+
+                    <div class="editable-content" contenteditable="true" data-editable-type="notes">
+                        <p>Add your personal notes about this exhibition here...</p>
+                    </div>
+                   
+                    <details>
+                        <summary>View All Details</summary>
+                        <section class="news-full-content">
+                            <p itemprop="articleBody">{{ news_info.content|default:'No content available' }}</p>
+                            
+                            <aside class="article-navigation" aria-label="Article sections">
+                                <h4>Article Sections</h4>
+                                <ul>
+                                    <li><a href="#section1-{{ forloop.counter0 }}">Introduction</a></li>
+                                    <li><a href="#section2-{{ forloop.counter0 }}">Exhibition Details</a></li>
+                                    <li><a href="#section3-{{ forloop.counter0 }}">Visitor Information</a></li>
+                                </ul>
+                            </aside>
+
+                            <section id="section1-{{ forloop.counter0 }}">
+                                <h4>Introduction</h4>
+                                <p>This groundbreaking exhibition brings together...</p>
+                                <a href="#news-{{ forloop.counter0 }}">Back to top</a>
+                            </section>
+
+                            <section id="section2-{{ forloop.counter0 }}">
+                                <h4>Exhibition Details</h4>
+                                <p>Open from 9 AM to 6 PM daily...</p>
+                            </section>
+
+                            <section id="section3-{{ forloop.counter0 }}">
+                                <h4>Visitor Information</h4>
+                                <p>Tickets can be purchased online or at the door...</p>
+                            </section>
+
+                            <nav class="news-links" aria-label="Related resources">
+                                <a href="/exhibitions" title="View current exhibitions">Related Exhibition</a>
+                                <a href="/documents/catalog.pdf" download="museum_catalog_2023.pdf">Download Catalog (PDF)</a>
+                                <a href="https://yandex.by/maps/157/minsk/?ll=27.602831%2C53.864590&z=14" target="_blank" rel="noopener">View Location Map</a>
+                                <a href="tel:+375123456789" itemprop="telephone">Call: +375 (12) 345-67-89</a>
+                                <a href="mailto:info@museum.com" itemprop="email">Email Us</a>
+                            </nav>
+                        </section>
+                    </details>
+                    
+                    <footer class="news-footer">
+                        {% if news_info.date %}
+                        <time datetime="{{ news_info.date|date:'Y-m-d' }}">{{ news_info.date|date:"F j, Y" }}</time>
+                        {% endif %}
+                        <span class="article-id" data-news-id="{{ news_info.id|default:'000' }}">ID: {{ news_info.id|default:'N/A' }}</span>
+                    </footer>
+                </section>
+            </article>
+            {% endfor %}
+        </section>
+
+        <section class="museum-stats">
+            <h2>Museum Statistics</h2>
+            <table>
+                <caption>Annual Visitor Statistics and Revenue</caption>
+                <thead>
+                    <tr>
+                        <th id="year">Year</th>
+                        <th id="visitors">Visitors</th>
+                        <th id="revenue" colspan="2">Revenue (thousands $)</th>
+                        <th id="growth">Growth %</th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th id="tickets">Tickets</th>
+                        <th id="merch">Merchandise</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td headers="year">2023</td>
+                        <td headers="visitors">125,430</td>
+                        <td headers="revenue tickets">1,250</td>
+                        <td headers="revenue merch">890</td>
+                        <td headers="growth">+15%</td>
+                    </tr>
+                    <tr>
+                        <td headers="year">2022</td>
+                        <td headers="visitors">109,200</td>
+                        <td headers="revenue tickets">1,080</td>
+                        <td headers="revenue merch">750</td>
+                        <td headers="growth">+8%</td>
+                    </tr>
+                    <tr>
+                        <td headers="year">2021</td>
+                        <td headers="visitors">101,150</td>
+                        <td headers="revenue tickets">990</td>
+                        <td headers="revenue merch">680</td>
+                        <td headers="growth">-5%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="museum-hours">
+            <h2>Museum Opening Hours</h2>
+            <table>
+                <caption>Weekly schedule and admission prices</caption>
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Opening Hours</th>
+                        <th>Admission Price</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Monday</td>
+                        <td>Closed</td>
+                        <td>-</td>
+                        <td>Maintenance day</td>
+                    </tr>
+                    <tr>
+                        <td>Tuesday-Friday</td>
+                        <td>9:00-18:00</td>
+                        <td>$15</td>
+                        <td>Full access</td>
+                    </tr>
+                    <tr>
+                        <td>Saturday-Sunday</td>
+                        <td>10:00-20:00</td>
+                        <td>$20</td>
+                        <td>Weekend rate</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="newsletter-form">
+            <h2>Subscribe to Our Newsletter</h2>
+            <form method="post" novalidate id="newsletter-form">
+                {% csrf_token %}
+                <fieldset>
+                    <legend>Stay updated with our latest news</legend>
+                    
+                    <div class="form-group">
+                        <label for="name">Full Name:</label>
+                        <input type="text" id="name" name="name" required 
+                               pattern="[A-Za-z ]{2,50}" 
+                               title="Please enter your full name (2-50 characters)"
+                               minlength="2" maxlength="50">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address:</label>
+                        <input type="email" id="email" name="email" required 
+                               placeholder="your@email.com"
+                               title="Please enter a valid email address">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number:</label>
+                        <input type="tel" id="phone" name="phone" 
+                               pattern="[\+]\d{1,3}[\s]\d{2}[\s]\d{3}[\s]\d{2}[\s]\d{2}"
+                               placeholder="+375 12 345 67 89"
+                               title="Format: +375 12 345 67 89">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="birthdate">Birth Date:</label>
+                        <input type="date" id="birthdate" name="birthdate"
+                               min="1900-01-01" max="2023-12-31">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="age">Age:</label>
+                        <input type="number" id="age" name="age" min="12" max="120"
+                               placeholder="18">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category">Preferred Category:</label>
+                        <select id="category" name="category" required>
+                            <option value="">Select category...</option>
+                            <option value="exhibitions">Exhibitions</option>
+                            <option value="events">Events</option>
+                            <option value="education">Education Programs</option>
+                            <option value="membership">Membership</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="frequency">Update Frequency:</label>
+                        <select id="frequency" name="frequency" multiple size="3">
+                            <option value="daily">Daily</option>
+                            <option value="weekly" selected>Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+
+                    <fieldset class="form-group">
+                        <legend>Preferred Communication Method:</legend>
+                        <label>
+                            <input type="radio" name="communication" value="email" checked>
+                            Email
+                        </label>
+                        <label>
+                            <input type="radio" name="communication" value="sms">
+                            SMS
+                        </label>
+                        <label>
+                            <input type="radio" name="communication" value="both">
+                            Both
+                        </label>
+                    </fieldset>
+
+                    <fieldset class="form-group">
+                        <legend>Interests (select all that apply):</legend>
+                        <label>
+                            <input type="checkbox" name="interests" value="painting">
+                            Painting
+                        </label>
+                        <label>
+                            <input type="checkbox" name="interests" value="sculpture">
+                            Sculpture
+                        </label>
+                        <label>
+                            <input type="checkbox" name="interests" value="photography">
+                            Photography
+                        </label>
+                        <label>
+                            <input type="checkbox" name="interests" value="digital-art">
+                            Digital Art
+                        </label>
+                    </fieldset>
+
+                    <div class="form-group">
+                        <label for="message">Your Message:</label>
+                        <textarea id="message" name="message" rows="4" 
+                                  placeholder="Tell us what you're interested in..."
+                                  minlength="10" maxlength="500"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="website">Your Website:</label>
+                        <input type="url" id="website" name="website"
+                               placeholder="https://yourwebsite.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password (for account creation):</label>
+                        <input type="password" id="password" name="password"
+                               minlength="8" required
+                               placeholder="Minimum 8 characters">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="file">Upload Photo (optional):</label>
+                        <input type="file" id="file" name="file"
+                               accept="image/*,.pdf">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit">Subscribe</button>
+                        <button type="reset">Clear Form</button>
+                        <button type="button" id="preview-btn">Preview</button>
+                    </div>
+                </fieldset>
+            </form>
+        </section>
+
+        <section class="location-map">
+            <h2>Visit Us</h2>
+            <figure class="map-container">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d11790.15632596305!2d27.561708!3d53.902257!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNTPCsDU0JzA4LjEiTiAyN8KwMzMnNDIuMiJF!5e0!3m2!1sen!2sby!4v1620000000000!5m2!1sen!2sby" 
+                        width="600" 
+                        height="300" 
+                        style="border:0;" 
+                        allowfullscreen="" 
+                        loading="lazy"
+                        title="Museum Location Map">
+                </iframe>
+                <figcaption>
+                    <strong>Address:</strong> пер. Козлова 153, Минск<br>
+                    <a href="https://yandex.by/maps/157/minsk/?ll=27.602831%2C53.864590&z=14" 
+                       target="_blank" rel="noopener">
+                        View on Yandex Maps
+                    </a>
+                </figcaption>
+            </figure>
+        </section>
+
+        <section class="multimedia-content">
+            <h2>Multimedia Experience</h2>
+            
+           <figure>
+                <figcaption>Audio Sample</figcaption>
+                <audio controls>
+                    <source src="/media/images/music.mp3" type="audio/mpeg"> 
+                    Your browser does not support the audio element.
+                </audio>
+            </figure>
+
+            <figure>
+                  <video width="400" controls>
+                    <source src="/media/company/video/Hailuo_Video_video_for_the_museum_vebsite_422251526558457862.mp4" type="video/mp4">
+                    Ваш браузер не поддерживает видео.
+                </video>
+            </figure>
+        </section>
+
+    </div>
+</main>
+{% endblock %}
