@@ -1,0 +1,133 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <h1 class="profile-title">Personal Information</h1>
+    </div>
+
+    <div class="profile-section">
+        <div class="profile-card">
+            <div class="profile-info">
+                {% if user.is_staff %}
+                <div class="profile-image">
+                    <img src="{{ current_user.image_source.url }}" alt="Profile image" class="profile-img"/>
+                </div>
+                {% endif %}
+                
+                <div class="profile-details">
+                    <h3 class="section-title">Basic Information</h3>
+                    <div class="detail-item">
+                        <span class="detail-label">Lastname:</span>
+                        <span class="detail-value">{{ current_user.user.last_name }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Firstname:</span>
+                        <span class="detail-value">{{ current_user.user.first_name }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Email:</span>
+                        <span class="detail-value">{{ current_user.user.email }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="timezone-card">
+            <h3 class="section-title">Timezone Data</h3>
+            <div class="detail-item">
+                <span class="detail-label">User timezone:</span>
+                <span class="detail-value">{{ user_timezone }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">User time:</span>
+                <span class="detail-value">{{ current_date_formatted }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">UTC:</span>
+                <span class="detail-value">{{ utc_time }}</span>
+            </div>
+            <div class="calendar-container">
+                <h4>Calendar</h4>
+                <pre class="calendar-text">{{ calendar_text }}</pre>
+            </div>
+        </div>
+    </div>
+
+    {% if user.is_staff %}
+    <div class="exhibits-section">
+        <h2 class="section-header">My Exhibits</h2>
+        <div class="exhibits-grid">
+            {% for exhibit in exhibit_for_employee %}
+            <div class="exhibit-card">
+                <div class="exhibit-image">
+                    <img src="{{ exhibit.image_source.url }}" alt="{{ exhibit.name }}" class="exhibit-img"/>
+                </div>
+                <div class="exhibit-details">
+                    <h4>{{ exhibit.name }}</h4>
+                    <div class="exhibit-info">
+                        <span><i class="fas fa-calendar"></i> {{ exhibit.date }}</span>
+                        <span><i class="fas fa-paint-brush"></i> {{ exhibit.art }}</span>
+                        <span><i class="fas fa-door-open"></i> {{ exhibit.hall }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="exhibitions-section">
+        <h2 class="section-header">My Exhibitions</h2>
+        <div class="exhibitions-grid">
+            {% for exhibition in exhibition_for_employee %}
+            <div class="exhibition-card">
+                <h4>{{ exhibition.name }}</h4>
+                <div class="exhibition-info">
+                    <div class="info-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>{{ exhibition.date }}</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-hashtag"></i>
+                        <span>{{ exhibition.code }}</span>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-door-open"></i>
+                        <span>{{ exhibition.hall }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if not user.is_staff %}
+    <div class="orders-section">
+        <div class="orders-header">
+            <h2 class="section-header">My Orders</h2>
+            <!-- <a href="{% url 'add_order' %}" class="add-order-btn">
+                <i class="fas fa-plus"></i> Add New Order -->
+            </a>
+        </div>
+        
+        {% for order in orders %}
+        <div class="order-card">
+            <div class="order-header">
+                <h4>Order #{{ order.pk }}</h4>
+                <span class="order-price">{{ order.get_total_price }} BYN</span>
+            </div>
+            <!-- <div class="order-details">
+                <p class="order-exhibition">{{ order.exhibitions.name }}</p>
+                <a href="{{ order.get_absolute_url_to_more_info }}" class="order-link">
+                    View Details <i class="fas fa-chevron-right"></i>
+                </a>
+            </div> -->
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+
+{% endblock %}

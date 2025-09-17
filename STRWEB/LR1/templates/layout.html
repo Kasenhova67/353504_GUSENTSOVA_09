@@ -1,0 +1,74 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}  {% endblock %}</title>
+
+</head>
+<body>
+    <header>
+         <img src="/media/images/logo02.png" alt="Museum Logo" class="logo" style="height: 40px;">
+      
+        <nav>
+            <ul>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'museum' %}">Museum</a></li>
+                <li><a href="{% url 'exhibitions' %}">Exhibitions</a></li>
+                <li><a href="{% url 'about' %}">About us</a></li>
+                <li><a href="{% url 'news' %}">News</a></li>
+                <li><a href="{% url 'contacts' %}">Contacts</a></li>
+                <li><a href="{% url 'dictionary' %}">Questions</a></li>
+                <li><a href="{% url 'policy' %}">Privacy Policy</a></li>
+                <li><a href="{% url 'vacancies' %}">Vacancies</a></li>
+                <li><a href="{% url 'reviews' %}">Reviews</a></li>
+                <li><a href="{% url 'discounts' %}">Promotional codes and coupons</a></li>
+                {% if user.is_staff %}
+                    <li><a href="{% url 'employee_positions' %}">Employee positions</a></li>
+                    <li><a href="{% url 'employees' %}">Employees</a></li>
+                {% endif %}
+                {% if user.is_superuser %}
+                    <li><a href="{% url 'clients' %}">Clients</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        <div class="auth-links">
+            {% if user.is_authenticated %}
+                {% if not user.is_superuser %}
+                    {% if user.is_staff %}
+                        <a href="{% url 'employee_profile' %}">Profile</a>
+                    {% else %}
+                        <a href="{% url 'client_profile' %}">Profile</a>
+                    {% endif %}
+                {% endif %}
+                <a href="{% url 'logout' %}">Log out</a>
+            {% else %}
+                <a href="{% url 'login' %}">Log in</a>
+                <span class="separator">|</span>
+                <a href="{% url 'register' %}">Sign up</a>
+            {% endif %}
+
+           {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
+<li>
+    <a href="{% url 'cart' %}">
+        <i class="fas fa-shopping-cart"></i> Cart
+        {% with items_count=request.user.client.get_active_cart_items_count %}
+            {% if items_count > 0 %}
+                <span class="cart-badge">{{ items_count }}</span>
+            {% endif %}
+        {% endwith %}
+    </a>
+</li>
+{% endif %}
+        </div>
+    </header>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+</body>
+</html>

@@ -1,0 +1,81 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Museum
+{% endblock %}
+
+{% block content %}
+<div class="museum-container">
+    <div class="museum-header">
+        <h1 class="museum-title">Museum</h1>
+        
+        {% if user.is_superuser %}
+        <form class="filter-form">
+            <div class="filter-control">
+                <input type="checkbox" id="show_recent_exhibits" name="show_recent_exhibits" 
+                       {% if show_recent_exhibits %}checked{% endif %}>
+                <label for="show_recent_exhibits">Show only exhibits added in the last 6 months</label>
+            </div>
+            <button type="submit" class="filter-button">Apply</button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% for hal in halls %}
+    <div class="hall-card">
+        <div class="hall-header">
+            <h2 class="hall-title">Hall - {{ hal.name }}</h2>
+            <div class="hall-meta">
+                <span class="meta-item">Number: {{ hal.nomer }}</span>
+                <span class="meta-item">Floor: {{ hal.floor }}</span>
+                <span class="meta-item">Square: {{ hal.square }} m²</span>
+            </div>
+        </div>
+
+        <h3 class="section-title">Exhibits in hall:</h3>
+        <div class="exhibits-grid">
+            {% for el in exhibits %}
+                {% if el.hall.name == hal.name %}
+                    {% if not show_recent_exhibits or el.date >= main_date %}
+                    <div class="exhibit-card">
+                        <div class="exhibit-image">
+                            <img src="{{ el.image_source.url }}" alt="{{ el.name }}"/>
+                        </div>
+                        <div class="exhibit-info">
+                            <h4 class="exhibit-name">{{ el.name }}</h4>
+                            <p class="exhibit-detail"><strong>Art:</strong> {{ el.art }}</p>
+                            <p class="exhibit-detail"><strong>Keeper:</strong> {{ el.keeper }}</p>
+                            {% if user.is_superuser %}
+                            <p class="exhibit-date"><strong>Receipt date:</strong> {{ el.date }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        {% if user.is_superuser %}
+        <h4 class="section-title">Employees in hall:</h4>
+        <div class="employees-grid">
+            {% for el in employees %}
+                {% if el.hall.name == hal.name %}
+                <div class="employee-card">
+                    <div class="employee-image">
+                        <img src="{{ el.image_source.url }}" alt="{{ el.user.username }}"/>
+                    </div>
+                    <div class="employee-info">
+                        <h5 class="employee-name">{{ el.user.username }}</h5>
+                        <p class="employee-detail"><strong>Job:</strong> {{ el.job }}</p>
+                        <p class="employee-detail"><strong>Email:</strong> {{ el.user.email }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
