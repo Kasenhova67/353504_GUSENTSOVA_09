@@ -1,0 +1,427 @@
+.tour-planner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Заголовок */
+.planner-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 15px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.planner-header h2 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.planner-header p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+/* Основной контент */
+.planner-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 768px) {
+  .planner-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Секция выбора туров */
+.tours-selection h3 {
+  font-size: 1.8rem;
+  color: #2d3748;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 3px solid #667eea;
+}
+
+.tours-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.tour-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid #e2e8f0;
+  position: relative;
+  overflow: hidden;
+}
+
+.tour-card:hover {
+  transform: translateY(-5px);
+  border-color: #667eea;
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+}
+
+.tour-card.selected {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #f6f8ff 0%, #f0f4ff 100%);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+}
+
+.tour-card.selected::before {
+  content: '✓ Выбрано';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #48bb78;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.tour-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.tour-header h4 {
+  font-size: 1.4rem;
+  color: #2d3748;
+  margin: 0;
+  flex: 1;
+}
+
+.tour-price {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 6px 15px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  white-space: nowrap;
+}
+
+.tour-description {
+  color: #4a5568;
+  line-height: 1.6;
+  margin-bottom: 15px;
+  font-size: 0.95rem;
+}
+
+.tour-details {
+  display: flex;
+  gap: 20px;
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+.tour-details span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Форма бронирования */
+.booking-form {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  position: sticky;
+  top: 20px;
+}
+
+.booking-form h3 {
+  font-size: 1.6rem;
+  color: #2d3748;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  color: #4a5568;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.time-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.time-slot {
+  padding: 12px 20px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #4a5568;
+  transition: all 0.2s ease;
+  min-width: 80px;
+  text-align: center;
+}
+
+.time-slot:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.time-slot.selected {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: #667eea;
+  box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+}
+
+/* Счетчик посетителей */
+.visitor-counter {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #f7fafc;
+  padding: 15px;
+  border-radius: 10px;
+  max-width: 300px;
+}
+
+.visitor-counter button {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.visitor-counter button:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+
+.visitor-counter button:disabled {
+  background: #cbd5e0;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.visitor-counter span {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2d3748;
+  min-width: 40px;
+  text-align: center;
+}
+
+.counter-info {
+  color: #718096;
+  font-size: 0.9rem;
+  font-weight: 400;
+  margin-left: 10px;
+}
+
+/* Сводка бронирования */
+.booking-summary {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 25px;
+  border-left: 4px solid #667eea;
+}
+
+.booking-summary h4 {
+  color: #2d3748;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+}
+
+.summary-details p {
+  margin: 8px 0;
+  color: #4a5568;
+  display: flex;
+  justify-content: space-between;
+}
+
+.summary-details strong {
+  color: #2d3748;
+}
+
+.total-price {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 2px dashed #e2e8f0;
+  font-size: 1.2rem;
+  color: #2d3748 !important;
+}
+
+.total-price strong {
+  color: #667eea;
+  font-size: 1.4rem;
+}
+
+/* Кнопка бронирования */
+.book-btn {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(72, 187, 120, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.book-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(72, 187, 120, 0.4);
+}
+
+.book-btn:disabled {
+  background: #cbd5e0;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Советы для посетителей */
+.tour-tips {
+  background: linear-gradient(135deg, #f6f8ff 0%, #f0f4ff 100%);
+  border-radius: 15px;
+  padding: 30px;
+  margin-top: 40px;
+  border: 2px solid #e2e8f0;
+}
+
+.tour-tips h3 {
+  font-size: 1.8rem;
+  color: #2d3748;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+.tip-card {
+  background: white;
+  border-radius: 10px;
+  padding: 25px;
+  transition: all 0.3s ease;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+}
+
+.tip-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-color: #667eea;
+}
+
+.tip-card h4 {
+  font-size: 1.3rem;
+  color: #2d3748;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.tip-card p {
+  color: #4a5568;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Адаптивные стили */
+@media (max-width: 480px) {
+  .tour-planner {
+    padding: 15px;
+  }
+  
+  .planner-header h2 {
+    font-size: 2rem;
+  }
+  
+  .tour-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .tour-price {
+    align-self: flex-start;
+  }
+  
+  .visitor-counter {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+/* Анимации */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tour-card, .tip-card, .booking-form {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.tour-card:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.tour-card:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+/* Иконки */
+.tour-card::before,
+.tip-card h4::before {
+  font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+}
