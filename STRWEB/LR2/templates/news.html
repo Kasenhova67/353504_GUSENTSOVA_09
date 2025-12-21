@@ -1,0 +1,392 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    News
+{% endblock %}
+
+{% block head %}
+    <meta charset="UTF-8">
+    <!-- <title>Museum News - National Art Museum</title> -->
+
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    
+{% endblock %}
+
+{% block content %}
+<main class="news-container" itemscope itemtype="https://schema.org/WebPage">
+   
+    <p itemscope itemtype="мероприятие">Детское представление <spаn itemprop="название_мероприятия"> «Щелкунчик»</spаn> состоится <spаn itemprop="дата">22 декабря</spаn> в <spаn itemprop="место_проведения">нашем музее</spаn></p>
+
+    <nav class="horizontal-nav" aria-label="Main navigation">
+        <a href="/">Home</a>  |  <a href="/exhibitions" data-page="exhibitions">Exhibitions</a>  |  <a href="/about" data-page="about">About</a>
+    </nav>
+
+    <div class="news-layout">
+        <nav class="vertical-nav" aria-label="News categories and archive">
+            <h2>News Categories</h2>
+            <ul>
+                <li><a href="#exhibitions" class="nav-link">Exhibitions</a></li>
+                <li><a href="#events" class="nav-link">Events</a></li>
+                <li><a href="#education" class="nav-link">Education</a></li>
+                <li><a href="#collections" class="nav-link">Collections</a></li>
+                <li><a href="#research" class="nav-link">Research</a></li>
+                <li><a href="#conservation" class="nav-link">Conservation</a></li>
+            </ul>
+            
+            <h2>Archive</h2>
+            <ol> 
+                <li><a href="#2023" class="nav-link">2023</a></li>
+                <li type="A"><a href="#2022" class="nav-link">2022</a></li>
+                <li type="i"><a href="#2021" class="nav-link">2021</a></li>
+                <li><a href="#2020" class="nav-link">2020</a></li>
+            </ol>
+        </nav>
+        
+
+        <section class="news-content">
+            <h2 class="visually-hidden">News articles</h2>
+           
+                    <p>This is <strong>very important information</strong> about the exhibition. 
+                       We <em>strongly recommend</em> booking tickets in advance. 
+                       Don't miss this <mark>unique opportunity</mark> to see rare artworks.</p>
+
+                    <blockquote cite="https://www.example.com/degas-quotes">
+                        <p>"Art is not what you see, but what you make others see."</p>
+                        <footer>— <cite>Edgar Degas</cite></footer>
+                    </blockquote>
+
+                    <p>The <abbr title="Museum of Modern Art" itemprop="publisher">MOMA</abbr> exhibition opens next week.</p>
+
+                    <dl>
+                        <dt>Vernissage</dt>
+                        <dd>A private viewing of artworks before the public opening</dd>
+                        
+                        <dt>Curator</dt>
+                        <dd>A person who selects and organizes artworks for exhibition</dd>
+                    </dl>
+
+                    <pre><code class="language-javascript">
+// Museum opening hours function
+function getOpeningHours(day) {
+    switch(day) {
+        case 'Monday': return 'Closed';
+        case 'Tuesday': return '10:00-18:00';
+        default: return '09:00-20:00';
+    }
+}
+
+// Example usage
+const hours = getOpeningHours('Wednesday');
+console.log(hours); // Output: 09:00-20:00
+                    </code></pre>
+
+                    <pre class="poem" translate="no">
+The art hangs still
+Upon the wall,
+Silent and patient
+Waiting for all.
+                    </pre>
+
+                    <p class="multiline-text">
+                        The exhibition features works from the Renaissance period,<br>
+                        including rare paintings and sculptures that haven't been<br>
+                        displayed together in over a century. Visitors will have<br>
+                        the unique opportunity to experience these masterpieces.
+                    </p>
+
+            {% for news_info in news %}
+                <article class="news-card" id="news-{{ forloop.counter0 }}" itemprop="mainEntity" itemscope itemtype="https://schema.org/Article">
+                    <figure class="news-image-container">
+                        {% if news_info.image_source and news_info.image_source.url %}
+                        <img src="{{ news_info.image_source.url }}" 
+                            alt="{{ news_info.title|default:'Museum news image' }}"
+                            srcset="{{ news_info.image_source.url }} 1200w"
+                            sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            loading="lazy"
+                            itemprop="image"
+                            width="100%" 
+                            height="auto">
+                        {% endif %}
+                        <figcaption>Image: {{ news_info.title|default:'News image' }}</figcaption>
+                    </figure>
+
+                    <section class="news-content">
+                        <h3 itemprop="headline">{{ news_info.title|default:'Untitled News' }}</h3>                
+                    
+                        <div class="news-meta">
+                            {% if news_info.date %}
+                            <time datetime="{{ news_info.date|date:'Y-m-d' }}" itemprop="datePublished">
+                                📅 {{ news_info.date|date:"F j, Y" }}
+                            </time>
+                            {% endif %}
+                            <span itemprop="author" itemscope itemtype="https://schema.org/Person">
+                                By <span itemprop="name">Museum Staff</span>
+                            </span>
+                        </div>
+
+                        <div class="news-excerpt">
+                            {{ news_info.excerpt|default:news_info.content|truncatewords:20 }}
+                        </div>
+
+                        <details>
+                            <summary class="read-more-btn">Read More</summary>
+                            
+                            <div class="news-full-content" itemprop="articleBody">
+                                <p>{{ news_info.content|default:'No content available' }}</p>
+                            </div>
+                        </details>
+
+                    </section>
+                </article>
+                {% empty %}
+                <div class="no-news">
+                    <p>No news articles available at the moment.</p>
+                </div>
+                {% endfor %}
+        </section>
+
+       <table >
+        <tr>
+            <th id="year">Year</th>
+            <th id="visitors">Visitors</th>
+            <th id="tickets">Tickets Sold</th>
+        </tr>
+        <tr>
+            <th id="first" headers="year">2023:</th>
+            <td headers="visitors first">125,430</td>
+            <td headers="tickets first">1,250</td>
+        </tr>
+        <tr>
+            <th id="second" headers="year">2022:</th>
+            <td headers="visitors second">109,200</td>
+            <td headers="tickets second">1,080</td>
+        </tr>
+        <tr>
+            <th id="third" headers="year">2021:</th>
+            <td headers="visitors third">101,150</td>
+            <td headers="tickets third">990</td>
+        </tr>
+    </table>
+
+
+
+      <section class="museum-hours">
+    <h2>Museum Opening Hours</h2>
+    <table>
+        <caption>Weekly schedule and admission prices</caption>
+        <thead>
+            <tr>
+                <th >Day</th>
+                <th >Opening Hours</th>
+                <th >Admission Price</th>
+                <th >Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td >Monday</td>
+                <td  colspan="2">Closed</td>
+                <td >Maintenance day</td>
+            </tr>
+            <tr>
+                <td i>Tuesday-Friday</td>
+                <td >9:00-18:00</td>
+                <td >$15</td>
+                <td rowspan="2" >Full access</td>
+            </tr>
+            <tr>
+                <td >Saturday-Sunday</td>
+                <td >10:00-20:00</td>
+                <td >$20</td>
+            </tr>
+        </tbody>
+    </table>
+    <a href="/media/company/video/Hailuo_Video_video_for_the_museum_vebsite_422251526558457862.mp4" download>
+        <button>Download Schedule</button>
+    </a>
+</section>
+
+
+        <section class="newsletter-form">
+         
+            <h2>Subscribe to Our Newsletter</h2>
+            <form method="post" novalidate id="newsletter-form">
+                {% csrf_token %} 
+                <fieldset>
+                    <legend>Stay updated with our latest news</legend>
+                    
+                    <div class="form-group">
+                        <label for="name">Full Name:</label>
+                        <input type="text" id="name" name="name" required 
+                               pattern="[A-Za-z ]{2,50}" 
+                               title="Please enter your full name (2-50 characters)"
+                               minlength="2" maxlength="50">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address:</label>
+                        <input type="email" id="email" name="email" required 
+                               placeholder="your@email.com"
+                               title="Please enter a valid email address">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number:</label>
+                        <input type="tel" id="phone" name="phone" 
+                               pattern="[\+]\d{1,3}[\s]\d{2}[\s]\d{3}[\s]\d{2}[\s]\d{2}"
+                               placeholder="+375 12 345 67 89"
+                               title="Format: +375 12 345 67 89">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="birthdate">Birth Date:</label>
+                        <input type="date" id="birthdate" name="birthdate"
+                               min="1900-01-01" max="2023-12-31">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="age">Age:</label>
+                        <input type="number" id="age" name="age" min="12" max="120"
+                               placeholder="18">
+                    </div>
+
+                    <div class="form-group">
+                       <label for="category">Preferred Category:</label>
+                        <input list="categories" id="category" name="category" required>
+                        <datalist id="categories">
+                            <option value="Exhibitions">Exhibitions</option>
+                            <option value="Events">Events</option>
+                            <option value="Education Programs">Education Programs</option>
+                            <option value="Membership">Membership</option>
+                        </datalist>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="frequency">Update Frequency:</label>
+                        <select id="frequency" name="frequency" multiple size="3">
+                            <option value="daily">Daily</option>
+                            <option value="weekly" selected>Weekly</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+
+                    <fieldset class="form-group">
+                        <legend>Preferred Communication Method:</legend>
+                        <label>
+                            <input type="radio" name="communication" value="email" checked>
+                            Email
+                        </label>
+                        <label>
+                            <input type="radio" name="communication" value="sms">
+                            SMS
+                        </label>
+                        <label>
+                            <input type="radio" name="communication" value="both">
+                            Both
+                        </label>
+                    </fieldset>
+
+                    <fieldset class="form-group">
+                        <legend>Interests (select all that apply):</legend>
+                        <label>
+                            <input type="checkbox" name="interests" value="painting">
+                            Painting
+                        </label>
+                        <label>
+                            <input type="checkbox" name="interests" value="sculpture">
+                            Sculpture
+                        </label>
+                        <label>
+                            <input type="checkbox" name="interests" value="photography">
+                            Photography
+                        </label>
+                        <label>
+                            <input type="checkbox" name="interests" value="digital-art">
+                            Digital Art
+                        </label>
+                    </fieldset>
+
+                    <div class="form-group">
+                        <label for="message">Your Message:</label>
+                        <textarea id="message" name="message" rows="4" 
+                                  placeholder="Tell us what you're interested in..."
+                                  minlength="10" maxlength="500"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="website">Your Website:</label>
+                        <input type="url" id="website" name="website"
+                               placeholder="https://yourwebsite.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password (for account creation):</label>
+                        <input type="password" id="password" name="password"
+                               minlength="8" required
+                               placeholder="Minimum 8 characters">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="file">Upload Photo (optional):</label>
+                        <input type="file" id="file" name="file"
+                               accept="image/*,.pdf">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit">Subscribe</button>
+                        <button type="reset">Clear Form</button>
+                        <button type="button" id="preview-btn">Preview</button>
+                    </div>
+                </fieldset>
+            </form>
+        </section>
+
+        <section class="location-map">
+            <h2>Visit Us</h2>
+            <figure class="map-container">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d11790.15632596305!2d27.561708!3d53.902257!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNTPCsDU0JzA4LjEiTiAyN8KwMzMnNDIuMiJF!5e0!3m2!1sen!2sby!4v1620000000000!5m2!1sen!2sby" 
+                        width="600" 
+                        height="300" 
+                        style="border:0;" 
+                        allowfullscreen="" 
+                        loading="lazy"
+                        title="Museum Location Map">
+                </iframe>
+                <figcaption>
+                    <strong>Address:</strong> пер. Козлова 153, Минск<br>
+                    <a href="https://yandex.by/maps/157/minsk/?ll=27.602831%2C53.864590&z=14" 
+                       target="_blank" rel="noopener">
+                        View on Yandex Maps
+                    </a>
+                </figcaption>
+            </figure>
+        </section>
+
+        <section class="multimedia-content">
+            <h2>Multimedia Experience</h2>
+            
+           <figure>
+                <figcaption>Audio Sample</figcaption>
+                <audio controls>
+                    <source src="/media/images/music.mp3" type="audio/mpeg"> 
+                    Your browser does not support the audio element.
+                </audio>
+            </figure>
+
+            <figure>
+                <video width="400" controls  >
+                    <source src="/media/company/video/Hailuo_Video_video_for_the_museum_vebsite_422251526558457862.mp4" type="video/mp4"  >
+                    Ваш браузер не поддерживает видео.
+                    
+                </video>
+                
+
+            </figure>
+        </section>
+
+
+
+    </div>
+</main>
+{% endblock %}

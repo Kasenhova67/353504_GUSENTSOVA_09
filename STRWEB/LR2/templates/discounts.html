@@ -1,0 +1,239 @@
+{% extends 'layout.html' %}
+{% block title %}Discounts{% endblock %}
+
+{% block content %}
+<div class="discounts-container">
+    <h1>Available bonuses</h1>
+    <ul class="promo-list">
+        {% for bonus in bonuses %}
+            <li class="promo-item">
+                <span class="promo-code">{{ bonus.code }}</span>: 
+                discount <span class="promo-discount">{{ bonus.discount_percentage }}%</span>
+            </li>
+        {% endfor %}
+    </ul>
+    
+    <h1>Archived bonuses</h1>
+    <ul class="promo-list">
+        {% for promo_code in promo_codes %}
+            <li class="promo-item archived">
+                <span class="promo-code">{{ promo_code.code }}</span>: 
+                discount <span class="promo-discount">{{ promo_code.discount_percentage }}%</span>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Генератор текстовых областей -->
+    <div class="textareas-generator">
+        <h2>📝 Text Area Generator</h2>
+        
+        <!-- Флажок для включения генератора -->
+        <div class="generator-toggle">
+            <label class="toggle-label">
+                <input type="checkbox" id="generator-toggle">
+                <span class="toggle-slider"></span>
+                Enable Text Area Generator
+            </label>
+        </div>
+
+        <!-- Форма настроек (появляется при включении флажка) -->
+        <div id="settings-form" class="settings-form" style="display: none;">
+            <h3>Text Area Settings</h3>
+            
+            <div class="settings-grid">
+                <div class="setting-group">
+                    <label for="textarea-name">Name:</label>
+                    <input type="text" id="textarea-name" placeholder="Enter name attribute">
+                </div>
+                
+                <div class="setting-group">
+                    <label for="textarea-rows">Rows:</label>
+                    <input type="number" id="textarea-rows" value="4" min="1" max="20">
+                </div>
+                
+                <div class="setting-group">
+                    <label for="textarea-cols">Columns (Width):</label>
+                    <input type="number" id="textarea-cols" value="50" min="10" max="200">
+                    <small>Approximate width in characters</small>
+                </div>
+                
+                <div class="setting-group">
+                    <label for="textarea-placeholder">Placeholder:</label>
+                    <input type="text" id="textarea-placeholder" placeholder="Enter placeholder text">
+                </div>
+                
+                <div class="setting-group">
+                    <label for="textarea-maxlength">Max Length:</label>
+                    <input type="number" id="textarea-maxlength" placeholder="No limit" min="1">
+                </div>
+            </div>
+
+            <div class="wrap-setting">
+                <label>
+                    <input type="checkbox" id="textarea-wrap" checked>
+                    Enable text wrapping
+                </label>
+            </div>
+
+            <div class="readonly-setting">
+                <label>
+                    <input type="checkbox" id="textarea-readonly">
+                    Readonly
+                </label>
+            </div>
+
+            <button id="generate-btn" class="generate-btn">Generate Text Area</button>
+        </div>
+
+        <div id="textareas-container" class="textareas-container">
+           
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+class TextAreaGenerator {
+    constructor() {
+        this.textareas = this.loadFromStorage();
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+        this.setupTextAreaEvents();
+        this.renderTextAreas();
+    }
+    
+    setupEventListeners() {
+       
+        document.getElementById('generator-toggle').addEventListener('change', (e) => {
+            document.getElementById('settings-form').style.display = e.target.checked ? 'block' : 'none';
+        });
+       
+        document.getElementById('generate-btn').addEventListener('click', () => {
+            this.generateTextArea();
+        });
+    }
+    
+    setupTextAreaEvents() {
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('generated-textarea-field')) {
+                this.saveToStorage();
+            }
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.target.classList.contains('generated-textarea-field') && e.key === 'Enter') {
+                setTimeout(() => this.saveToStorage(), 100);
+            }
+        });
+    }
+    
+    generateTextArea() {
+        const settings = this.getSettings();
+        const textareaId = 'textarea-' + Date.now();
+        
+        const textareaData = {
+            id: textareaId,
+            settings: settings,
+            content: ''
+        };
+        
+        this.textareas.push(textareaData);
+        this.renderTextAreas();
+        this.saveToStorage();
+    }
+    
+    getSettings() {
+        return {
+            name: document.getElementById('textarea-name').value || 'textarea_' + Date.now(),
+            rows: parseInt(document.getElementById('textarea-rows').value) || 4,
+            cols: parseInt(document.getElementById('textarea-cols').value) || 50,
+            placeholder: document.getElementById('textarea-placeholder').value || '',
+            maxlength: document.getElementById('textarea-maxlength').value || null,
+            wrap: document.getElementById('textarea-wrap').checked,
+            readonly: document.getElementById('textarea-readonly').checked
+        };
+    }
+    
+    renderTextAreas() {
+        const container = document.getElementById('textareas-container');
+        
+        if (this.textareas.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <p>No text areas generated yet. Enable the generator and create your first one!</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = this.textareas.map(textareaData => {
+            const settings = textareaData.settings;
+            const maxlengthInfo = settings.maxlength ? 
+                `Max length: ${settings.maxlength} characters` : 
+                'No length limit';
+            
+            const colsClass = `textarea-cols-${Math.min(settings.cols, 200)}`;
+                
+            return `
+                <div class="generated-textarea" data-id="${textareaData.id}">
+                    <textarea 
+                        class="generated-textarea-field ${colsClass}"
+                        name="${settings.name}"
+                        rows="${settings.rows}"
+                        cols="${settings.cols}"
+                        ${settings.placeholder ? `placeholder="${settings.placeholder}"` : ''}
+                        ${settings.maxlength ? `maxlength="${settings.maxlength}"` : ''}
+                        ${settings.wrap ? 'wrap="soft"' : 'wrap="off"'}
+                        ${settings.readonly ? 'readonly' : ''}
+                        style="width: calc(${settings.cols}ch + 24px);"
+                    >${textareaData.content}</textarea>
+                    
+                    <div class="textarea-info">
+                        <span>Name: ${settings.name}</span>
+                        <span>Size: ${settings.rows}×${settings.cols}</span>
+                        <span>${maxlengthInfo}</span>
+                        <span>${settings.readonly ? 'Readonly' : 'Editable'}</span>
+                    </div>
+                    
+                    <div class="textarea-actions">
+                        <button class="delete-btn" onclick="textAreaGenerator.deleteTextArea('${textareaData.id}')">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    deleteTextArea(id) {
+        this.textareas = this.textareas.filter(ta => ta.id !== id);
+        this.renderTextAreas();
+        this.saveToStorage();
+    }
+    
+    saveToStorage() {
+        document.querySelectorAll('.generated-textarea-field').forEach((textarea, index) => {
+            if (this.textareas[index]) {
+                this.textareas[index].content = textarea.value;
+            }
+        });
+        
+        localStorage.setItem('generatedTextAreas', JSON.stringify(this.textareas));
+    }
+    
+    loadFromStorage() {
+        const saved = localStorage.getItem('generatedTextAreas');
+        return saved ? JSON.parse(saved) : [];
+    }
+}
+
+let textAreaGenerator;
+document.addEventListener('DOMContentLoaded', function() {
+    textAreaGenerator = new TextAreaGenerator();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'layout.html' %}
+
+{% block title %}Vacancies{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto; padding: 20px;">
+    <h1>Our vacancies</h1>
+    
+    {% if user.is_superuser %}
+        <a href="{% url 'add_vacancy' %}" class="link">Add new vacancy</a>
+    {% endif %}
+    
+    <div class="vacancies-list">
+        {% for vacancy in vacancies %}
+            <div class="vacancy-item">
+                <h2 class="vacancy-title">{{ vacancy.employee_position.name }}</h2>
+                <div class="vacancy-meta">Number of this position: {{ vacancy.number_of_this_position }}</div>
+                <div class="vacancy-description">{{ vacancy.vacancy_description }}</div>
+                
+                {% if perms.vacancy.add_vacancy %}
+                    <div class="vacancy-actions">
+                        <a href="{{ vacancy.get_absolute_url_for_delete }}" class="link">Delete</a>
+                        <a href="{{ vacancy.get_absolute_url_for_update}}" class="link">Update</a>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<hr>
+<h2>Демонстрация работы с API</h2>
+
+<button id="catBtn">Получить факт о котах</button>
+<p id="catFact"></p>
+
+<button id="jokeBtn">Получить случайную шутку</button>
+<p id="joke"></p>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+ 
+  document.getElementById("catBtn").addEventListener("click", function() {
+    fetch("https://catfact.ninja/fact")
+      .then(r => r.json())
+      .then(d => {
+        document.getElementById("catFact").textContent = d.fact;
+      })
+      .catch(error => {
+        console.error("Ошибка факта:", error);
+        document.getElementById("catFact").textContent = "Ошибка: " + error;
+      });
+  });
+
+  document.getElementById("jokeBtn").addEventListener("click", function() {
+    fetch("https://official-joke-api.appspot.com/random_joke")
+      .then(r => r.json())
+      .then(d => {
+        document.getElementById("joke").textContent = d.setup + " - " + d.punchline;
+      })
+      .catch(error => {
+        console.error("Ошибка шутки:", error);
+        document.getElementById("joke").textContent = "Ошибка: " + error;
+      });
+  });
+});
+</script>
+{% endblock %}

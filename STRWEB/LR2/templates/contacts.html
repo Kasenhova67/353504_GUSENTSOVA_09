@@ -1,0 +1,591 @@
+{% extends 'layout.html' %}
+{% block title %}Contacts{% endblock %}
+
+{% block content %}
+<div class="contacts-container">
+  <h1 class="contacts-title">Our Team</h1>
+
+  <div class="actions-bar">
+    <div class="filter-group">
+      <input type="text" id="filterInput" placeholder="Фильтр по ФИО, должности, телефону, email">
+      <button id="filterBtn">Найти</button>
+      <button id="resetFilterBtn">Сброс</button>
+    </div>
+   
+  </div>
+  {% if user.is_superuser %}
+    <div class="add-group">
+      <button id="showAddFormBtn">Добавить</button>
+    </div>
+    {% endif %}
+
+  {% if user.is_superuser %}
+  <div id="addForm" class="add-form" hidden>
+    <h3>Добавить сотрудника</h3>
+    <div class="form-grid">
+      <label>ФИО
+        <input type="text" id="fullNameInput" placeholder="Иванов Иван Иванович">
+      </label>
+      <label>Описание работ
+        <textarea id="descInput" rows="2" placeholder="Чем занимается сотрудник..."></textarea>
+      </label>
+      <label>Телефон
+        <input type="text" id="phoneInput" placeholder="+375 (29) 111-22-33">
+      </label>
+      <label>Email
+        <input type="email" id="emailInput" placeholder="user@example.com">
+      </label>
+      <label>Сайт (URL)
+        <input type="text" id="websiteUrlInput" placeholder="https://site.ru/page.html">
+      </label>
+      <!-- Убрано поле для загрузки фото -->
+    </div>
+    <div class="validation-messages">
+      <div id="urlValidationMsg"></div>
+      <div id="phoneValidationMsg"></div>
+    </div>
+    <div class="form-actions">
+      <button id="validateBtn">Проверить</button>
+      <button id="addRowBtn" disabled>Добавить в таблицу</button>
+      <button id="cancelAddBtn">Отмена</button>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Остальной код без изменений -->
+  <div class="table-wrapper">
+    <table id="contactsTable">
+      <thead>
+        <tr>
+          <th class="sortable" data-key="fullName">ФИО
+            <span class="sort-indicator"></span>
+            <span class="sort-text"></span>
+          </th>
+          <th>Фото</th>
+          <th class="sortable" data-key="job">Должность
+            <span class="sort-indicator"></span>
+            <span class="sort-text"></span>
+          </th>
+          <th class="sortable" data-key="description">Описание работ
+            <span class="sort-indicator"></span>
+            <span class="sort-text"></span>
+          </th>
+          <th class="sortable" data-key="phone">Телефон
+            <span class="sort-indicator"></span>
+            <span class="sort-text"></span>
+          </th>
+          <th class="sortable" data-key="email">Почта
+            <span class="sort-indicator"></span>
+            <span class="sort-text"></span>
+          </th>
+          <th>Выбрать</th>
+        </tr>
+      </thead>
+      <tbody id="contactsBody"></tbody>
+    </table>
+  </div>
+
+  <div class="pagination">
+    <button id="prevPage">Prev</button>
+    <span id="pageInfo"></span>
+    <button id="nextPage">Next</button>
+  </div>
+
+  <div id="detailsBlock" class="details-block" hidden></div>
+
+  <div class="bonus-block">
+    <button id="bonusBtn">Премировать</button>
+    <div id="bonusResult" class="bonus-result"></div>
+  </div>
+</div>
+
+<div class="page-preloader" role="status" aria-live="polite" hidden>
+  <div class="circular-lines">
+    <div class="circular-line circular-line-1"></div>
+    <div class="circular-line circular-line-2"></div>
+    <div class="circular-line circular-line-3"></div>
+  </div>
+  <div class="loading-text">Loading...</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const ENDPOINT = '{% url "contacts_api" %}';
+  const PAGE_SIZE = 3;
+  // Фото по умолчанию - используем относительный путь
+  const DEFAULT_PHOTO = '/media/images/photo_2023-10-17_21-58-31.jpg';
+
+  const preloader = document.querySelector('.page-preloader');
+  const tbody = document.getElementById('contactsBody');
+  const prevBtn = document.getElementById('prevPage');
+  const nextBtn = document.getElementById('nextPage');
+  const pageInfo = document.getElementById('pageInfo');
+  const filterInput = document.getElementById('filterInput');
+  const filterBtn = document.getElementById('filterBtn');
+  const resetFilterBtn = document.getElementById('resetFilterBtn');
+  const detailsBlock = document.getElementById('detailsBlock');
+  const bonusBtn = document.getElementById('bonusBtn');
+  const bonusResult = document.getElementById('bonusResult');
+
+  const showAddFormBtn = document.getElementById('showAddFormBtn');
+  const addForm = document.getElementById('addForm');
+  const fullNameInput = document.getElementById('fullNameInput');
+  const descInput = document.getElementById('descInput');
+  const phoneInput = document.getElementById('phoneInput');
+  const emailInput = document.getElementById('emailInput');
+  const websiteUrlInput = document.getElementById('websiteUrlInput');
+  const urlValidationMsg = document.getElementById('urlValidationMsg');
+  const phoneValidationMsg = document.getElementById('phoneValidationMsg');
+  const validateBtn = document.getElementById('validateBtn');
+  const addRowBtn = document.getElementById('addRowBtn');
+  const cancelAddBtn = document.getElementById('cancelAddBtn');
+
+  const thSortables = document.querySelectorAll('th.sortable');
+
+  let rawData = [];        
+  let filteredData = [];    
+  let sortState = { key: null, dir: 'asc' };
+  let currentPage = 1;
+  const selectedIds = new Set(); 
+
+  function getCSRFToken() {
+    const m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : '';
+  }
+
+  function showPreloader() { 
+    if (preloader) preloader.hidden = false; 
+  }
+  
+  function hidePreloader() { 
+    if (preloader) preloader.hidden = true; 
+  }
+
+  function toggleAddButton() {
+    if (!addRowBtn) return;
+    
+    const allFilled = [fullNameInput, descInput, phoneInput, emailInput, websiteUrlInput]
+      .every(i => i && i.value.trim() !== '');
+    
+    const hasWebsite = websiteUrlInput && websiteUrlInput.value.trim() !== '';
+    const urlOk = hasWebsite ? isValidUrlCustom(websiteUrlInput.value.trim()) : false;
+    const phoneOk = phoneInput ? isValidPhoneCustom(phoneInput.value.trim()) : false;
+    
+    addRowBtn.disabled = !(allFilled && hasWebsite && phoneOk && urlOk);
+  }
+
+  async function loadData() {
+    showPreloader();
+    try {
+      const res = await fetch(ENDPOINT, { 
+        headers: { 
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        } 
+      });
+      
+      if (res.ok) {
+        const json = await res.json();
+        rawData = Array.isArray(json) ? json : (json.results || []);
+      } else {
+        console.warn('Не удалось загрузить данные с сервера. Статус:', res.status);
+        rawData = [];
+      }
+      
+      filteredData = [...rawData];
+      currentPage = 1;
+      render();
+    } catch (e) {
+      console.error('Ошибка загрузки данных:', e);
+      rawData = [];
+      filteredData = [];
+      currentPage = 1;
+      render();
+    } finally {
+      hidePreloader();
+    }
+  }
+
+  function render() {
+    if (!tbody) return;
+    
+    if (sortState.key) {
+      filteredData.sort((a, b) => {
+        const av = (a[sortState.key] ?? '').toString().toLowerCase();
+        const bv = (b[sortState.key] ?? '').toString().toLowerCase();
+        if (av < bv) return sortState.dir === 'asc' ? -1 : 1;
+        if (av > bv) return sortState.dir === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    
+    const totalPages = Math.max(1, Math.ceil(filteredData.length / PAGE_SIZE));
+    currentPage = Math.min(currentPage, totalPages);
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const pageItems = filteredData.slice(start, start + PAGE_SIZE);
+
+    tbody.innerHTML = '';
+    
+    if (pageItems.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" style="text-align: center; padding: 20px;">
+            Нет данных для отображения
+          </td>
+        </tr>
+      `;
+    } else {
+      pageItems.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = 'clickable-row';
+        tr.dataset.id = item.id;
+        const checked = selectedIds.has(String(item.id)) ? 'checked' : '';
+
+        tr.innerHTML = `
+          <td>${escapeHtml(item.fullName || '')}</td>
+          <td><img src="${escapeAttr(item.photoUrl || '')}" alt="${escapeAttr(item.fullName || '')}" class="tbl-photo" onerror="this.src='${DEFAULT_PHOTO}'"></td>
+          <td>${escapeHtml(item.job || '')}</td>
+          <td>${escapeHtml(item.description || '')}</td>
+          <td>${escapeHtml(item.phone || '')}</td>
+          <td><a href="mailto:${escapeAttr(item.email || '')}">${escapeHtml(item.email || '')}</a></td>
+          <td><input type="checkbox" class="select-checkbox" data-id="${escapeAttr(item.id || '')}" data-name="${escapeAttr(item.fullName || '')}" ${checked}></td>
+        `;
+
+        tr.addEventListener('click', (e) => {
+          if (e.target.closest('input[type="checkbox"], a')) return;
+          showDetails(item);
+        });
+
+        const checkbox = tr.querySelector('.select-checkbox');
+        if (checkbox) {
+          checkbox.addEventListener('change', (e) => {
+            const id = String(e.target.dataset.id);
+            if (e.target.checked) selectedIds.add(id);
+            else selectedIds.delete(id);
+          });
+        }
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    if (prevBtn) prevBtn.disabled = currentPage === 1;
+    if (nextBtn) nextBtn.disabled = currentPage === totalPages;
+    if (pageInfo) pageInfo.textContent = `Страница ${currentPage} из ${totalPages}`;
+  }
+
+  function showDetails(item) {
+    if (!detailsBlock) return;
+    
+    detailsBlock.hidden = false;
+    detailsBlock.innerHTML = `
+      <h3>Детали сотрудника</h3>
+      <div class="details-grid">
+        <img src="${escapeAttr(item.photoUrl || '')}" alt="${escapeAttr(item.fullName || '')}" class="details-photo" onerror="this.src='${DEFAULT_PHOTO}'">
+        <div>
+          <p><strong>ФИО:</strong> ${escapeHtml(item.fullName || '')}</p>
+          <p><strong>Должность:</strong> ${escapeHtml(item.job || '')}</p>
+          <p><strong>Описание:</strong> ${escapeHtml(item.description || '')}</p>
+          <p><strong>Телефон:</strong> ${escapeHtml(item.phone || '')}</p>
+          <p><strong>Email:</strong> <a href="mailto:${escapeAttr(item.email || '')}">${escapeHtml(item.email || '')}</a></p>
+        </div>
+      </div>
+    `;
+  }
+
+  if (thSortables.length > 0) {
+    thSortables.forEach(th => {
+      th.addEventListener('click', async () => {
+        showPreloader();
+        try {
+          const key = th.dataset.key;
+          if (sortState.key === key) {
+            sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+          } else {
+            sortState.key = key;
+            sortState.dir = 'asc';
+          }
+          
+          document.querySelectorAll('.sort-indicator').forEach(si => si.textContent = '');
+          document.querySelectorAll('.sort-text').forEach(st => st.textContent = '');
+          
+          const indicator = th.querySelector('.sort-indicator');
+          const text = th.querySelector('.sort-text');
+          
+          if (indicator) indicator.textContent = sortState.dir === 'asc' ? '▲' : '▼';
+          if (text) text.textContent = sortState.dir === 'asc' ? 'по возрастанию' : 'по убыванию';
+          
+          currentPage = 1;
+          render();
+        } finally {
+          hidePreloader();
+        }
+      });
+    });
+  }
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', async () => {
+      if (currentPage > 1) {
+        showPreloader();
+        try { currentPage--; render(); } finally { hidePreloader(); }
+      }
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', async () => {
+      const totalPages = Math.max(1, Math.ceil(filteredData.length / PAGE_SIZE));
+      if (currentPage < totalPages) {
+        showPreloader();
+        try { currentPage++; render(); } finally { hidePreloader(); }
+      }
+    });
+  }
+
+  if (filterBtn) {
+    filterBtn.addEventListener('click', async () => {
+      showPreloader();
+      try {
+        const q = filterInput.value.trim().toLowerCase();
+        filteredData = rawData.filter(item => {
+          const source = [item.fullName, item.job, item.description, item.phone, item.email]
+            .map(v => (v || '').toString().toLowerCase())
+            .join(' ');
+          return source.includes(q);
+        });
+        currentPage = 1;
+        render();
+      } finally { hidePreloader(); }
+    });
+  }
+
+  if (resetFilterBtn) {
+    resetFilterBtn.addEventListener('click', async () => {
+      showPreloader();
+      try {
+        if (filterInput) filterInput.value = '';
+        filteredData = [...rawData];
+        currentPage = 1;
+        render();
+      } finally { hidePreloader(); }
+    });
+  }
+
+  if (bonusBtn) {
+    bonusBtn.addEventListener('click', async () => {
+      showPreloader();
+      try {
+        const ids = Array.from(selectedIds);
+        if (ids.length === 0) {
+          if (bonusResult) bonusResult.textContent = 'Никто не выбран для премирования.';
+          return;
+        }
+        const names = rawData
+          .filter(i => ids.includes(String(i.id)))
+          .map(i => i.fullName);
+        if (bonusResult) bonusResult.textContent = `Премировать: ${names.join(', ')}. Отличная работа!`;
+        selectedIds.clear();
+        render();
+      } finally { hidePreloader(); }
+    });
+  }
+
+  function isValidUrlCustom(url) {
+    const re = /^(https?:\/\/)[\w.-]+\.[a-zA-Z]{2,}(\/[\w\/_.-]+)?\.(php|html)$/i;
+    return re.test(url);
+  }
+
+  function isValidPhoneCustom(phone) {
+    const cleaned = phone.trim();
+    const re = /^(\+375\s*\(?\s*(25|29|33|44)\s*\)?|8\s*\(?0(25|29|33|44)\)?)\s*[\d\s-]{7,}$/;
+    return re.test(cleaned);
+  }
+
+  function setFieldValidity(input, valid, msgEl, okText, errText) {
+    if (!input || !msgEl) return;
+    
+    if (valid) { 
+      input.classList.remove('invalid'); 
+      input.classList.add('valid'); 
+      msgEl.textContent = okText; 
+      msgEl.className = 'msg ok'; 
+    } else { 
+      input.classList.remove('valid'); 
+      input.classList.add('invalid'); 
+      msgEl.textContent = errText; 
+      msgEl.className = 'msg err'; 
+    }
+    toggleAddButton();
+  }
+
+  if (validateBtn && urlValidationMsg && phoneValidationMsg) {
+    validateBtn.addEventListener('click', () => {
+      setFieldValidity(websiteUrlInput, isValidUrlCustom(websiteUrlInput.value.trim()), urlValidationMsg, 'URL валиден.', 'URL невалиден: http(s) + .php/.html');
+      setFieldValidity(phoneInput, isValidPhoneCustom(phoneInput.value.trim()), phoneValidationMsg, 'Телефон валиден.', 'Телефон невалиден: +375/8, допускаются пробелы/дефисы');
+    });
+  }
+
+  const formInputs = [fullNameInput, descInput, phoneInput, emailInput, websiteUrlInput];
+  formInputs.forEach(i => {
+    if (i) i.addEventListener('input', toggleAddButton);
+  });
+
+  if (showAddFormBtn && addForm) {
+    showAddFormBtn.addEventListener('click', () => { 
+      addForm.hidden = !addForm.hidden; 
+    });
+  }
+
+  if (cancelAddBtn && addForm) {
+    cancelAddBtn.addEventListener('click', () => { 
+      addForm.hidden = true; 
+      clearAddForm(); 
+    });
+  }
+
+  function clearAddForm() {
+    [fullNameInput, descInput, phoneInput, emailInput, websiteUrlInput].forEach(i => { 
+      if (i) {
+        i.value=''; 
+        i.classList.remove('invalid','valid'); 
+      }
+    });
+    if (urlValidationMsg) urlValidationMsg.textContent = '';
+    if (phoneValidationMsg) phoneValidationMsg.textContent = '';
+    if (addRowBtn) addRowBtn.disabled = true;
+  }
+
+  if (addRowBtn) {
+    addRowBtn.addEventListener('click', async () => {
+      showPreloader();
+      try {
+      
+        const finalEmail = emailInput ? emailInput.value.trim() : '';
+
+        const payload = {
+          fullName: fullNameInput ? fullNameInput.value.trim() : '',
+          description: descInput ? descInput.value.trim() : '',
+          phone: phoneInput ? phoneInput.value.trim() : '',
+          email: finalEmail, 
+          photoUrl: DEFAULT_PHOTO, 
+          job: 'Новый сотрудник'
+        };
+
+        console.log('Отправляемые данные:', payload);
+
+        const res = await fetch(ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken(),
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+        
+        const responseText = await res.text();
+        console.log('Ответ сервера:', responseText);
+        
+        if (!res.ok) {
+          
+          if (res.status === 400 || res.status === 500) {
+            if (responseText.includes('email') && responseText.includes('UNIQUE')) {
+              throw new Error('Этот email уже используется. Пожалуйста, введите другой email.');
+            }
+          }
+          throw new Error(`Ошибка сервера: ${res.status} ${res.statusText}`);
+        }
+        
+        const result = JSON.parse(responseText);
+        console.log('Успешно добавлено:', result);
+        
+        await loadData();
+        if (addForm) addForm.hidden = true;
+        clearAddForm();
+        
+        alert('Сотрудник добавлен! ');
+        
+      } catch (e) {
+        console.error('Полная ошибка:', e);
+        alert(`Ошибка при добавлении: ${e.message}`);
+      } finally { 
+        hidePreloader(); 
+      }
+    });
+}
+
+  function escapeHtml(s) {
+    return (s ?? '').toString()
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  
+  function escapeAttr(s) { 
+    return escapeHtml(s); 
+  }
+
+  loadData();
+});
+</script>
+
+<style>
+
+.contacts-container { padding: 20px; }
+
+.filter-group { display: flex; gap: 8px; flex: 1; }
+#filterInput { flex: 1; padding: 10px 12px; font-size: 1rem; min-width: 320px; }
+.filter-group button { padding: 10px 12px; }
+
+.actions-bar { display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.add-group button { padding: 10px 12px; }
+
+.table-wrapper { overflow-x: auto; border: 1px solid #e3e3e3; border-radius: 8px; background: #fff; }
+#contactsTable { width: 100%; border-collapse: collapse; }
+#contactsTable thead th { padding: 10px; border-bottom: 1px solid #ddd; text-align: left; user-select: none; }
+#contactsTable tbody td { padding: 10px; border-bottom: 1px solid #f2f2f2; vertical-align: top; }
+#contactsTable tbody tr.clickable-row { cursor: pointer; }
+#contactsTable tbody tr.clickable-row:hover { background: #fafafa; }
+
+th.sortable { cursor: pointer; }
+.sort-indicator { margin-left: 6px; color: #333; font-weight: bold; }
+.sort-text { margin-left: 6px; color: #777; font-size: 0.9rem; }
+
+.tbl-photo { width: 70px; height: 70px; object-fit: cover; border-radius: 6px; border: 1px solid #eee; background: #f8f8f8; }
+
+.pagination { margin: 12px 0; display: flex; align-items: center; gap: 10px; }
+.pagination button { padding: 8px 12px; }
+
+.details-block { margin-top: 16px; padding: 12px; border: 1px solid #e3e3e3; border-radius: 8px; background: #fff; }
+.details-grid { display: grid; grid-template-columns: 100px 1fr; gap: 12px; align-items: start; }
+.details-photo { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; }
+
+.bonus-block { margin-top: 16px; display: flex; gap: 12px; align-items: center; }
+.bonus-result { margin-top: 8px; }
+
+.add-form { margin: 12px 0; padding: 12px; border: 1px solid #e3e3e3; border-radius: 8px; background: #fff; }
+.add-form .form-grid { display: grid; grid-template-columns: repeat(2, minmax(240px, 1fr)); gap: 10px; }
+.add-form label { display: flex; flex-direction: column; gap: 6px; font-size: 0.95rem; }
+.add-form input, .add-form textarea { padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
+.add-form .file-input { padding: 6px; }
+.add-form .form-actions { display: flex; gap: 10px; margin-top: 10px; }
+.msg { margin-top: 4px; font-size: 0.9rem; }
+.msg.ok { color: #2ecc71; }
+.msg.err { color: #e74c3c; }
+.valid { border-color: #2ecc71; background: #f6fff9; }
+.invalid { border-color: #e74c3c; background: #fff1f1; }
+
+.page-preloader {
+  position: fixed; inset: 0; background: #0c0c2e;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: #fff; z-index: 9999;
+}
+.circular-lines { width:140px; height:140px; position:relative; }
+.circular-line { position:absolute; top:50%; left:50%; transform: translate(-50%,-50%); border-radius:50%; border:3px solid transparent; }
+.circular-line-1 { width:54px; height:54px; border-top-color:#ff6b6b; animation: spin 1.4s linear infinite; }
+.circular-line-2 { width:94px; height:94px; border-top-color:#f9ca24; animation: spin 2s linear infinite reverse; }
+.circular-line-3 { width:132px; height:132px; border-top-color:#4834d4; animation: spin 2.6s linear infinite; }
+.loading-text { margin-top:18px; font-size:1.05rem; }
+@keyframes spin { from{ transform: translate(-50%,-50%) rotate(0deg);} to{ transform: translate(-50%,-50%) rotate(360deg);} }
+</style>
+{% endblock %}

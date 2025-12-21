@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оформление заказа</title>
+</head>
+<body>
+    <header>
+        <h1>Оформление заказа</h1>
+    </header>
+    
+    <main>
+        <section aria-labelledby="order-summary-heading">
+            <header>
+                <h2 id="order-summary-heading">Ваш заказ</h2>
+            </header>
+            
+            <div>
+                {% for item in cart.items.all %}
+                <article>
+                    <h3>{{ item.exhibition.name }}</h3>
+                    <p>Количество: x{{ item.quantity }}</p>
+                    <p>Цена: {{ item.get_total_item_price }} руб.</p>
+                </article>
+                {% endfor %}
+                
+                <hr>
+                
+                <footer>
+                    <p><strong>Итого: {{ cart.get_total_price }} руб.</strong></p>
+                </footer>
+            </div>
+        </section>
+
+        <section aria-labelledby="payment-details-heading">
+            <header>
+                <h2 id="payment-details-heading">Данные карты</h2>
+            </header>
+            
+            <div>
+                <form method="post" id="payment-form">
+                    {% csrf_token %}
+                    
+                    {% if errors %}
+                    <aside role="alert">
+                        <h3>Ошибки:</h3>
+                        <ul>
+                        {% for field, error_list in errors.items %}
+                            {% for error in error_list %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        </ul>
+                    </aside>
+                    {% endif %}
+
+                    <fieldset>
+                        <legend>Информация о банковской карте</legend>
+                        
+                        <div>
+                            <label for="card-number">Номер карты</label>
+                            <input type="text" id="card-number" name="card_number" 
+                                placeholder="XXXX XXXX XXXX XXXX" required
+                                pattern="\d{4} \d{4} \d{4} \d{4}" 
+                                maxlength="19" 
+                                title="Введите номер карты в формате XXXX XXXX XXXX XXXX">
+                        </div>
+
+                        <div>
+                            <div>
+                                <label for="expiry-date">Срок действия (ММ/ГГ)</label>
+                                <input type="text" id="expiry-date" name="expiry_date" 
+                                    placeholder="MM/YY" required
+                                    pattern="(0[1-9]|1[0-2])\/\d{2}" 
+                                    maxlength="5" 
+                                    title="Введите срок действия в формате MM/YY">
+                            </div>
+                            <div>
+                                <label for="cvv">CVV</label>
+                                <input type="text" id="cvv" name="cvv" 
+                                    placeholder="XXX" required
+                                    pattern="\d{3}" 
+                                    maxlength="3" 
+                                    title="Введите CVV (3 цифры)">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="card-holder">Имя владельца карты</label>
+                            <input type="text" id="card-holder" name="card_holder" 
+                                   placeholder="IVAN IVANOV" required>
+                        </div>
+                    </fieldset>
+
+                    <button type="submit">
+                        Оплатить {{ cart.get_total_price }} руб.
+                    </button>
+                </form>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
