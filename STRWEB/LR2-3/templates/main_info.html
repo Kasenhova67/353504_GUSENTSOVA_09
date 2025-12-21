@@ -1,0 +1,477 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}
+    Main Page
+{% endblock %}
+
+{% block content %}
+
+
+{% if user.is_superuser %}
+<div style="background: #e9ecef; padding: 10px; margin: 10px 0; border-radius: 4px;">
+    <strong>Отладочная информация (только для админа):</strong><br>
+    Настройки слайдера: {{ slider_settings }}<br>
+    Источник: База данных
+</div>
+{% endif %}
+<section class="slider-container" 
+         id="slider-container"
+         data-delay="{{ slider_settings.delay }}"
+         data-loop="{{ slider_settings.loop|yesno:'true,false' }}"
+         data-navs="{{ slider_settings.navs|yesno:'true,false' }}"
+         data-pags="{{ slider_settings.pags|yesno:'true,false' }}"
+         data-auto="{{ slider_settings.auto|yesno:'true,false' }}"
+         data-stop-mouse-hover="{{ slider_settings.stop_mouse_hover|yesno:'true,false' }}">
+
+  <div id="slider" class="slider">
+    <div class="slide" data-link="http://127.0.0.1:8000/exhibition/4/">
+      <img src="/media/images/banner2.png" alt="Slide 1">
+      <div class="caption">Первый баннер</div>
+    </div>
+    <div class="slide" data-link="http://127.0.0.1:8000/exhibition/7/">
+      <img src="/media/images/banner3.png" alt="Slide 2">
+      <div class="caption">Второй баннер</div>
+    </div>
+    <div class="slide" data-link="http://127.0.0.1:8000/exhibition/6/">
+      <img src="/media/images/logo1.png" alt="Slide 3">
+      <div class="caption">Третий баннер</div>
+    </div>
+  </div>
+
+  <div id="counter" class="counter"></div>
+
+   {% if slider_settings.navs %}
+  <div id="navs" class="navs">
+    <button id="prev">‹</button>
+    <button id="next">›</button>
+  </div>
+  {% else %}
+  <div id="navs" style="display: none;"></div>
+  {% endif %}
+
+
+   {% if slider_settings.pags %}
+  <div id="pags" class="pags"></div>
+  {% else %}
+  <div id="pags" style="display: none;"></div>
+  {% endif %}
+</section>
+
+{% if user.is_superuser %}
+<form method="post" action="{% url 'set_slider_settings' %}" style="margin:20px 0; background: #f8f9fa; padding: 20px; border-radius: 8px;">
+  {% csrf_token %}
+  <h3>Настройки слайдера</h3>
+  
+  <div style="margin-bottom: 15px;">
+    <div style="margin-bottom: 10px;">
+      <input type="checkbox" name="auto" id="auto" {% if slider_settings.auto %}checked{% endif %}>
+      <label for="auto">Включить автопереключение</label>
+    </div>
+    
+    <div id="delay-container" 
+         style="margin-left: 20px;" 
+         {% if not slider_settings.use_delay|default:True %}style="margin-left: 20px; display: none;"{% endif %}>
+      <label for="delay">Задержка (сек):</label>
+      <input type="number" name="delay" id="delay" min="0" max="60" value="{{ slider_settings.delay|default:5 }}" 
+             {% if not slider_settings.use_delay|default:True %}disabled{% endif %}>
+      <small style="color: #666;">От 1 до 60 секунд</small>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 10px;">
+    <input type="checkbox" name="loop" id="loop" {% if slider_settings.loop %}checked{% endif %}>
+    <label for="loop">Loop (зациклить слайдер)</label>
+  </div>
+
+  <div style="margin-bottom: 10px;">
+    <input type="checkbox" name="navs" id="navs" {% if slider_settings.navs %}checked{% endif %}>
+    <label for="navs">Показывать стрелки навигации</label>
+  </div>
+
+  <div style="margin-bottom: 10px;">
+    <input type="checkbox" name="pags" id="pags" {% if slider_settings.pags %}checked{% endif %}>
+    <label for="pags">Показывать пагинацию</label>
+  </div>
+
+  <div style="margin-bottom: 10px;">
+    <input type="checkbox" name="stop_mouse_hover" id="stop_mouse_hover" 
+           {% if slider_settings.auto and slider_settings.stop_mouse_hover %}checked{% endif %}
+           {% if not slider_settings.auto %}disabled{% endif %}>
+    <label for="stop_mouse_hover">Останавливать при наведении мыши</label>
+    {% if not slider_settings.auto %}
+    <small style="color: #999; display: block;">(доступно только при включенном автопереключении)</small>
+    {% endif %}
+  </div>
+
+  <button type="submit">Сохранить настройки</button>
+</form>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function() {
+  const autoCheckbox = document.getElementById('auto');
+  const delayContainer = document.getElementById('delay-container');
+  const delayInput = document.getElementById('delay');
+  const stopMouseHoverCheckbox = document.getElementById('stop_mouse_hover');
+  
+  function updateVisibility() {
+    if (autoCheckbox && autoCheckbox.checked) {
+     
+      if (delayContainer) delayContainer.style.display = 'block';
+      if (delayInput) delayInput.disabled = false;
+      if (stopMouseHoverCheckbox) stopMouseHoverCheckbox.disabled = false;
+    } else {
+     
+      if (delayContainer) delayContainer.style.display = 'none';
+      if (delayInput) delayInput.disabled = true;
+      if (stopMouseHoverCheckbox) {
+        stopMouseHoverCheckbox.disabled = true;
+        stopMouseHoverCheckbox.checked = false;
+      }
+    }
+  }
+  
+  if (autoCheckbox) {
+    updateVisibility();
+    autoCheckbox.addEventListener('change', updateVisibility);
+  }
+});
+</script>
+{% endif %}
+
+<div class="features">
+    <section class="catalog">
+        <span class="name">Our Services</span>
+        <div class="services-grid">
+            {% for exhibition in exhibitions|slice:":6" %}
+            <div class="service-card">
+                <h3>{{ exhibition.name }}</h3>
+                <p><strong>Hall:</strong> {{ exhibition.hall.name }}</p>
+                <p><strong>Date:</strong> {{ exhibition.date|date:"M d, Y" }}</p>
+                <p><strong>Cost:</strong> ${{ exhibition.cost }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="latest-article">
+        <span class="name">Latest Article</span>
+        {% if latest_news %}
+        <div class="article-card">
+            <div class="article-badge">NEW</div>
+            <h3>{{ latest_news.title }}</h3>
+            <p>{{ latest_news.content|truncatewords:50 }}</p>
+            <p><strong>Published:</strong> {{ latest_news.date|date:"M d, Y" }}</p>
+            {% if latest_news.image_source %}
+            <img src="{{ latest_news.image_source.url }}" alt="News image" style="max-width: 100%; margin: 15px 0; border-radius: 8px;"/>
+            {% endif %}
+            <div>
+                <a class="butt" href="{% url 'news' %}">Read More</a>
+            </div>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 40px; background: #f8f9fa; border-radius: 8px;">
+            <p style="color: #666; font-size: 16px;">No articles available.</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <section class="partners">
+        <span class="name">Our Partners</span>
+        <div class="partners-grid">
+            {% for company in partners %}
+            <div class="partner-card">
+                <a href="{{ company.website }}" target="_blank">
+                    <div class="partner-logo-container">
+                        <img src="{{ company.logo.url }}" alt="{{ company.name }} Logo" class="partner-logo">
+                    </div>
+                    <p class="partner-name">{{ company.name }}</p>
+                </a>
+            </div>
+            {% empty %}
+            <div class="no-partners"><p>No partners available.</p></div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+
+<style>
+.slider-container { position: relative; max-width: 800px; margin: 20px auto; overflow: hidden; border-radius: 8px; }
+.slider { position: relative; min-height: 300px; }
+.slider .slide { display: none; position: absolute; inset: 0; cursor: pointer; }
+.slider .slide:first-child { display: block; }
+.slider .slide img { width: 100%; height: auto; display: block; border-radius: 8px; }
+.caption { position: absolute; top: 10px; height: 25px; left: 20px; color: #fff; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 4px; }
+.counter { position: absolute; top: 10px; right: 20px; background: rgba(0,0,0,0.5); color: #fff; padding: 3px 8px; border-radius: 4px; }
+.navs { position: absolute; top: 50%; left: 0; right: 0; display: flex; justify-content: space-between; transform: translateY(-50%); padding: 0 8px; }
+.navs button { background: rgba(0,0,0,0.5); border: none; color: #fff; font-size: 24px; padding: 8px 12px; cursor: pointer; border-radius: 50%; }
+.pags { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); }
+.pags .dot { height: 12px; width: 12px; margin: 0 4px; background-color: #bbb; border-radius: 50%; display: inline-block; cursor: pointer; }
+.pags .dot.active { background-color: #717171; }
+</style>
+<script>
+ (function() {
+  class Slider {
+    constructor(options) {
+      this.container = document.querySelector('.slider');
+      this.slides = this.container ? this.container.querySelectorAll('.slide') : [];
+      this.total = this.slides.length;
+      this.index = 0;
+
+      this.settings = {
+        loop: options.loop,
+        navs: options.navs,
+        pags: options.pags,
+        auto: options.auto,
+        stopMouseHover: options.stopMouseHover,
+        delay: (options.delay || 5) * 1000
+      };
+
+      this.counter = document.getElementById('counter');
+      this.navsContainer = document.getElementById('navs');
+      this.pagsContainer = document.getElementById('pags');
+      
+      this.timer = null;
+      
+      this.boundHandleMouseEnter = this.handleMouseEnter.bind(this);
+      this.boundHandleMouseLeave = this.handleMouseLeave.bind(this);
+
+      console.log('Slider initialized with settings:', this.settings);
+      console.log('stopMouseHover should work:', this.settings.auto && this.settings.stopMouseHover);
+
+      if (!this.container || this.total === 0) return;
+      this.init();
+    }
+
+    init() {
+      this.showSlide(this.index);
+      
+      if (this.settings.navs && this.navsContainer) {
+        this.initNavs();
+        this.navsContainer.style.display = 'flex';
+      } else if (this.navsContainer) {
+        this.navsContainer.style.display = 'none';
+      }
+      
+      if (this.settings.pags && this.pagsContainer) {
+        this.initPags();
+        this.pagsContainer.style.display = 'block';
+      } else if (this.pagsContainer) {
+        this.pagsContainer.style.display = 'none';
+      }
+      
+      this.removeMouseHandlers();
+      
+      if (this.settings.auto) {
+        console.log('Starting auto rotation with delay:', this.settings.delay);
+        this.startAuto();
+        
+        if (this.settings.stopMouseHover) {
+          console.log('Adding mouse hover handlers');
+          this.container.addEventListener('mouseenter', this.boundHandleMouseEnter);
+          this.container.addEventListener('mouseleave', this.boundHandleMouseLeave);
+        } else {
+          console.log('Mouse hover handlers NOT added - stopMouseHover is false');
+        }
+      } else {
+        console.log('Auto rotation disabled - no mouse handlers will be added');
+      }
+
+      this.initSlideClicks();
+    }
+
+    removeMouseHandlers() {
+    
+      this.container.removeEventListener('mouseenter', this.boundHandleMouseEnter);
+      this.container.removeEventListener('mouseleave', this.boundHandleMouseLeave);
+      console.log('Mouse handlers removed');
+    }
+
+    handleMouseEnter() {
+      console.log('Mouse enter - stopping auto');
+      this.stopAuto();
+    }
+
+    handleMouseLeave() {
+      console.log('Mouse leave - starting auto');
+      this.startAuto();
+    }
+
+    initSlideClicks() {
+      this.slides.forEach(slide => {
+        slide.addEventListener('click', () => {
+          const link = slide.getAttribute('data-link');
+          if (link) {
+            window.location.href = link;
+          }
+        });
+      });
+    }
+
+    showSlide(i) {
+      this.slides.forEach((s, idx) => {
+        s.style.display = idx === i ? 'block' : 'none';
+      });
+      
+      if (this.counter) {
+        this.counter.textContent = `${i + 1}/${this.total}`;
+      }
+      
+      this.updatePags(i);
+    }
+
+    next() {
+      const atLast = this.index === this.total - 1;
+      if (!this.settings.loop && atLast) return;
+      this.index = (this.index + 1) % this.total;
+      this.showSlide(this.index);
+    }
+
+    prev() {
+      const atFirst = this.index === 0;
+      if (!this.settings.loop && atFirst) return;
+      this.index = (this.index - 1 + this.total) % this.total;
+      this.showSlide(this.index);
+    }
+
+    initNavs() {
+      const nextBtn = document.getElementById('next');
+      const prevBtn = document.getElementById('prev');
+      
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => { 
+          this.stopAuto(); 
+          this.next(); 
+        });
+      }
+      
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => { 
+          this.stopAuto(); 
+          this.prev(); 
+        });
+      }
+    }
+
+    initPags() {
+      if (!this.pagsContainer) return;
+      
+      this.pagsContainer.innerHTML = '';
+      for (let idx = 0; idx < this.total; idx++) {
+        const dot = document.createElement('span');
+        dot.className = 'dot';
+        dot.addEventListener('click', () => {
+          this.stopAuto();
+          this.index = idx;
+          this.showSlide(this.index);
+        });
+        this.pagsContainer.appendChild(dot);
+      }
+      this.updatePags(this.index);
+    }
+
+    updatePags(i) {
+      if (!this.settings.pags || !this.pagsContainer) return;
+      
+      const dots = this.pagsContainer.children;
+      for (let idx = 0; idx < dots.length; idx++) {
+        dots[idx].classList.toggle('active', idx === i);
+      }
+    }
+
+    startAuto() {
+      
+      if (!this.settings.auto) {
+        console.log('Cannot start auto - auto is disabled');
+        return;
+      }
+      
+      this.stopAuto();
+      console.log('Starting auto timer');
+      
+      this.timer = setInterval(() => {
+        this.next();
+      }, this.settings.delay);
+    }
+
+    stopAuto() {
+      if (this.timer) {
+        console.log('Stopping auto timer');
+        clearInterval(this.timer);
+        this.timer = null;
+      }
+    }
+    
+    updateSettings(newSettings) {
+      
+      this.stopAuto();
+      this.removeMouseHandlers();
+      
+      this.settings = { ...this.settings, ...newSettings };
+      console.log('Settings updated:', this.settings);
+      
+      this.init();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const root = document.getElementById('slider-container');
+    if (!root) {
+      console.log('Slider container not found');
+      return;
+    }
+    
+    const getBool = (v) => {
+      if (v === 'true' || v === 'True') return true;
+      if (v === 'false' || v === 'False') return false;
+      if (v === true || v === false) return v;
+      return String(v).toLowerCase() === 'true';
+    };
+
+    const delay = Number(root.dataset.delay) || 5;
+    const loop = getBool(root.dataset.loop);
+    const navs = getBool(root.dataset.navs);
+    const pags = getBool(root.dataset.pags);
+    const auto = getBool(root.dataset.auto);
+    const stopMouseHover = getBool(root.dataset.stopMouseHover);
+
+    console.log('Raw settings from HTML:', {
+      delay, loop, navs, pags, auto, stopMouseHover
+    });
+
+    const finalStopMouseHover = auto ? stopMouseHover : false;
+
+    const options = {
+      loop: loop,
+      navs: navs,
+      pags: pags,
+      auto: auto,
+      stopMouseHover: finalStopMouseHover,
+      delay: delay
+    };
+
+    console.log('Final slider options:', options);
+    
+    if (stopMouseHover && !auto) {
+      console.warn('⚠️ stopMouseHover включен в настройках, но auto выключен. stopMouseHover будет проигнорирован.');
+    }
+    
+    if (auto && !stopMouseHover) {
+      console.log('✅ Автопереключение включено, остановка мышью отключена');
+    }
+    
+    if (auto && stopMouseHover) {
+      console.log('✅ Автопереключение включено, остановка мышью включена');
+    }
+    
+    if (!auto) {
+      console.log('✅ Автопереключение отключено, остановка мышью недоступна');
+    }
+    
+    new Slider(options);
+  });
+})();
+</script>
+
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'layout.html' %}
+
+{% block title %}Registrations{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <p>{{ form.email.label_tag }} {{ form.email }}</p>
+  <p>{{ form.first_name.label_tag }} {{ form.first_name }}</p>
+  <p>{{ form.last_name.label_tag }} {{ form.last_name }}</p>
+  <p>{{ form.telephone.label_tag }} {{ form.telephone }}</p>
+  <p>{{ form.password1.label_tag }} {{ form.password1 }}</p>
+  <p>{{ form.password2.label_tag }} {{ form.password2 }}</p>
+  <p>{{ form.date_of_birth.label_tag }} {{ form.date_of_birth }}</p>
+
+  <span id="dobMessage" style="display:block; margin-top:5px; font-weight:bold;"></span>
+
+  {% if form.errors.date_of_birth %}
+    <p style="color:red;">{{ form.errors.date_of_birth.0 }}</p>
+  {% endif %}
+
+  <p><button type="submit" id="submitBtn">Sign up</button></p>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  console.log("JS работает");
+
+  const dobInput = document.getElementById('id_date_of_birth');
+  const dobMessage = document.getElementById('dobMessage');
+  const submitBtn = document.getElementById('submitBtn');
+
+  if (!dobInput || !dobMessage || !submitBtn) {
+    console.warn("Элемент не найден");
+    return;
+  }
+
+  dobInput.addEventListener('change', () => {
+    const value = dobInput.value;
+    if (!value) return;
+
+    const birthDate = new Date(value);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear() -
+      ((today.getMonth() < birthDate.getMonth()) ||
+       (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate()) ? 1 : 0);
+
+    const weekdays = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+    const weekday = weekdays[birthDate.getDay()];
+
+    if (age < 18) {
+      alert(`⚠️ Внимание!\n\nВам ${age} лет, вы родились в ${weekday}.\nТребуется разрешение родителей.`);
+      dobMessage.style.color = 'red';
+      dobMessage.textContent = `Вы родились в ${weekday}. Вам ${age} лет. Требуется разрешение родителей.`;
+      submitBtn.disabled = true;
+    } else {
+      dobMessage.style.color = 'green';
+      dobMessage.textContent = `Вы родились в ${weekday}. Вам ${age} лет.`;
+      submitBtn.disabled = false;
+    }
+  });
+});
+</script>
+{% endblock %}

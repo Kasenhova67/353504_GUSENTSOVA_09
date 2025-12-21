@@ -1,0 +1,75 @@
+{% extends 'layout.html' %}
+
+{% block title %}Shopping Cart{% endblock %}
+
+{% block content %}
+<main class="cart-container">
+    <header>
+        <h1 class="cart-title">Your Shopping Cart</h1>
+    </header>
+    
+    {% if cart.items.all %}
+        <section class="cart-items" aria-label="Items in your shopping cart">
+            {% for item in cart.items.all %}
+            <article class="cart-item">
+                <div class="item-info">
+                    <h2 class="item-name">{{ item.exhibition.name }}</h2>
+                    <p class="item-date"><time datetime="{{ item.exhibition.date|date:'Y-m-d H:i' }}">{{ item.exhibition.date|date:"d.m.Y H:i" }}</time></p>
+                    <p class="item-hall">Hall: {{ item.exhibition.hall.name }}</p>
+                </div>
+                
+                <div class="item-quantity">
+                    <form action="{% url 'update_cart_item' item.id %}" method="post" class="quantity-form">
+                        {% csrf_token %}
+                        <button type="submit" name="action" value="decrease" class="quantity-btn" aria-label="Decrease quantity">-</button>
+                        <span class="quantity">{{ item.quantity }}</span>
+                        <button type="submit" name="action" value="increase" class="quantity-btn" aria-label="Increase quantity">+</button>
+                    </form>
+                </div>
+                
+                <div class="item-price">
+                    <p class="price">{{ item.get_total_item_price }} BYN</p>
+                    <p class="unit-price">{{ item.exhibition.cost }} BYN each</p>
+                </div>
+                
+                <div class="item-actions">
+                    <form action="{% url 'update_cart_item' item.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" name="action" value="remove" class="remove-btn">
+                            <i class="fas fa-trash" aria-hidden="true"></i> Remove
+                        </button>
+                    </form>
+                </div>
+            </article>
+            {% endfor %}
+        </section>
+        
+        <section class="cart-summary" aria-labelledby="cart-summary-heading">
+            <h2 id="cart-summary-heading" class="visually-hidden">Cart Summary</h2>
+            
+            <div class="total">
+                <h3>Total: {{ cart.get_total_price }} BYN</h3>
+            </div>
+            
+            <div class="cart-actions">
+                <a href="{% url 'exhibitions' %}" class="continue-shopping">
+                    <i class="fas fa-arrow-left" aria-hidden="true"></i> Continue Shopping
+                </a>
+                
+                <a href="{% url 'checkout' %}" class="checkout-btn">
+                    <i class="fas fa-lock" aria-hidden="true"></i> Proceed to Checkout
+                </a>
+            </div>
+        </section>
+    {% else %}
+        <section class="empty-cart" aria-label="Empty cart notification">
+            <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+            <h2>Your cart is empty</h2>
+            <p>Add some exhibitions to your cart to get started</p>
+            <a href="{% url 'exhibitions' %}" class="browse-btn">
+                Browse Exhibitions
+            </a>
+        </section>
+    {% endif %}
+</main>
+{% endblock %}

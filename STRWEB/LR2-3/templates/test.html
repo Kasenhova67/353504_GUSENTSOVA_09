@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Test: Preloader → Museum → Title (CSS only)</title>
+<style>
+/* ------- ОБЯЗАТЕЛЬНО: встави это в самый верх нового файла для теста ------- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html,body { height:100%; }
+
+/* ========== 0. Общее ========== */
+body {
+  font-family: Georgia, serif;
+  background: #f2e6d3;
+  overflow: hidden; /* чтобы фиксация выглядела правильно в тесте */
+}
+
+/* ========== 1. Прелоадер (0—5s) ========== */
+.page-preloader {
+  position: fixed;
+  inset: 0;
+  background: #0c0c2e; /* непрозрачный плотный фон */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  z-index: 9999;
+  /* скрытие через 5s: старт delay=5s, длительность 0.8s */
+  animation: preloader-hide 0.8s ease forwards;
+  animation-delay: 5s;
+}
+
+/* прелоадер - круги */
+.circular-lines { width:140px; height:140px; position:relative; }
+.circular-line {
+  position:absolute;
+  top:50%; left:50%;
+  transform: translate(-50%,-50%);
+  border-radius:50%;
+  border:3px solid transparent;
+}
+.circular-line-1 { width:54px; height:54px; border-top-color:#ff6b6b; animation: spin 1.4s linear infinite; }
+.circular-line-2 { width:94px; height:94px; border-top-color:#f9ca24; animation: spin 2s linear infinite reverse; }
+.circular-line-3 { width:132px; height:132px; border-top-color:#4834d4; animation: spin 2.6s linear infinite; }
+
+.loading-text { margin-top:18px; font-size:1.05rem; }
+
+/* keyframes */
+@keyframes spin { from{ transform: translate(-50%,-50%) rotate(0deg);} to{ transform: translate(-50%,-50%) rotate(360deg);} }
+@keyframes preloader-hide {
+  0%   { opacity:1; visibility: visible; }
+  90%  { opacity:0; visibility: visible; }
+  100% { opacity:0; visibility: hidden; pointer-events:none; }
+}
+
+/* ========== 2. Музей (появляется в 5s, исчезает в 11s) ========== */
+/* контейнер музея — изначально скрыт (visibility:hidden), затем show@5s, hide@11s */
+.museum-animation {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg,#14122a 0%, #171433 70%, #2b1a12 100%); /* тёмная стена */
+  z-index: 500;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  /* show starts at 5s, hide starts at 11s */
+  animation:
+    museum-show 0.6s ease forwards 5s,
+    museum-hide 0.7s ease forwards 11s;
+}
+
+/* show -> becomes visible; hide -> becomes hidden */
+@keyframes museum-show { from { opacity:0; visibility:hidden; transform: scale(0.997);} to { opacity:1; visibility:visible; transform: scale(1);} }
+@keyframes museum-hide { from { opacity:1; visibility:visible;} to { opacity:0; visibility:hidden; pointer-events:none; } }
+
+/* нижняя полоса-пол */
+.museum-animation::after{
+  content:""; position:absolute; left:0; right:0; bottom:0; height:72px;
+  background: linear-gradient(to top, rgba(20,10,5,0.95), transparent 60%);
+  pointer-events:none;
+}
+
+/* ========== Галерея (картины) ========== */
+.gallery-hall {
+  position: absolute;
+  bottom: 28px;
+  width: 82%;
+  display:flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  z-index: 10;
+  pointer-events: none;
+  /* синхронно исчезает с museum (на случай) */
+  animation: gallery-hide 0.6s ease forwards 11s;
+}
+@keyframes gallery-hide { from{ opacity:1 } to{ opacity:0 } }
+
+.picture-frame {
+  width:96px; height:124px;
+  background:#8B4513; border:3px solid #D2691E; border-radius:4px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+  display:flex; align-items:center; justify-content:center;
+}
+.picture-content {
+  width:84%; height:86%; border-radius:2px;
+  animation: picture-cycle 6s linear 5s 1 forwards; /* выполняется ровно один цикл начиная в 5s (до 11s) */
+  box-shadow: inset 0 0 18px rgba(0,0,0,0.25);
+}
+@keyframes picture-cycle {
+  0%   { background: linear-gradient(135deg,#ff6b6b,#ee5a52); }
+  25%  { background: linear-gradient(135deg,#4834d4,#686de0); }
+  50%  { background: linear-gradient(135deg,#f9ca24,#f0932b); }
+  75%  { background: linear-gradient(135deg,#1dd1a1,#10ac84); }
+  100% { background: linear-gradient(135deg,#ff6b6b,#ee5a52); }
+}
+
+/* ========== Сфера ========== */
+.rotating-sphere {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  width:36px; height:46px; border-radius:50%;
+  background: radial-gradient(circle at 35% 35%, #fff7f7 0%, #ff9a9a 45%, #ff6b6b 100%);
+  box-shadow:0 0 24px rgba(255,100,100,0.55);
+  z-index: 12;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  animation:
+    sphere-show 0.4s ease forwards 5s,
+    sphere-hide 0.4s ease forwards 11s,
+    sphere-spin 1.8s linear infinite 5s;
+}
+@keyframes sphere-show { from{ opacity:0; visibility:hidden } to{ opacity:1; visibility:visible } }
+@keyframes sphere-hide { from{ opacity:1 } to{ opacity:0; visibility:hidden; pointer-events:none } }
+@keyframes sphere-spin { from{ transform: translate(-50%,-50%) rotate(0deg) } to{ transform: translate(-50%,-50%) rotate(360deg) } }
+
+/* ========== Название (появляется в 11s и остаётся) ========== */
+.company-name {
+  position: absolute;
+  top: 46%;
+  left: 50%;
+  transform: translate(-50%,-50%) scale(0.96);
+  color: #fff;
+  font-size: 3rem;
+  letter-spacing: 4px;
+  z-index: 2000;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  animation: title-show 0.9s cubic-bezier(.2,.8,.2,1) forwards;
+  animation-delay: 11s;
+}
+@keyframes title-show { 0%{ opacity:0; visibility:hidden; transform: translate(-50%,-50%) scale(0.96); filter: blur(4px); } 100%{ opacity:1; visibility:visible; transform: translate(-50%,-50%) scale(1); filter: blur(0); } }
+
+/* ========== FOR TEST: make it obvious if CSS not applied ========= */
+#debug-overlay {
+  position: fixed; right:8px; top:8px; z-index:99999;
+  background: rgba(0,0,0,0.6); color:#fff; padding:6px 8px; font-size:12px;
+  border-radius:6px; font-family: Arial, sans-serif;
+}
+</style>
+</head>
+<body>
+
+<div id="debug-overlay">Тестовый режим: CSS-only анимация</div>
+
+<!-- Прелоадер -->
+<div class="page-preloader" role="status" aria-live="polite">
+  <div class="circular-lines">
+    <div class="circular-line circular-line-1"></div>
+    <div class="circular-line circular-line-2"></div>
+    <div class="circular-line circular-line-3"></div>
+  </div>
+  <div class="loading-text">Loading...</div>
+</div>
+
+<!-- Музей -->
+<section class="museum-animation" aria-hidden="true">
+  <div class="gallery-hall">
+    <div class="picture-frame"><div class="picture-content"></div></div>
+    <div class="picture-frame"><div class="picture-content"></div></div>
+    <div class="picture-frame"><div class="picture-content"></div></div>
+  </div>
+
+  <div class="rotating-sphere" aria-hidden="true"></div>
+
+  <h1 class="company-name" aria-hidden="true">Art Museum</h1>
+</section>
+
+</body>
+</html>

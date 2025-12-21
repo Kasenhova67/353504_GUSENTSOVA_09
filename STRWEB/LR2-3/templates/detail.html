@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="product-detail">
+    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+    <h1>{{ product.name }}</h1>
+    <p class="price">{{ product.price }} руб.</p>
+    <p>{{ product.description }}</p>
+    
+    {% if user.is_authenticated %}
+    <button class="add-to-cart" data-product-id="{{ product.id }}">Добавить в корзину</button>
+    {% else %}
+    <p>Для добавления в корзину необходимо <a href="{% url 'login' %}">войти</a></p>
+    {% endif %}
+</div>
+
+<script>
+document.querySelector('.add-to-cart').addEventListener('click', function() {
+    const productId = this.getAttribute('data-product-id');
+    
+    fetch(`/add-to-cart/${productId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Товар добавлен в корзину!');
+        } else {
+            alert('Ошибка при добавлении в корзину');
+        }
+    });
+});
+</script>
+{% endblock %}

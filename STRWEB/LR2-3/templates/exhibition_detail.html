@@ -1,0 +1,56 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    {{ exhibition.name }}
+{% endblock %}
+
+{% block content %}
+<div class="exhibition-detail-container">
+    <div class="exhibition-detail-card">
+        <h1 class="exhibition-title">{{ exhibition.name }}</h1>
+        
+        <div class="exhibition-info">
+            <div class="info-item">
+                <span class="info-label">Date:</span>
+                <span class="info-value">{{ exhibition.date|date:"d.m.Y H:i" }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Group Size:</span>
+                <span class="info-value">{{ exhibition.people }} people</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Price:</span>
+                <span class="info-value price">{{ exhibition.cost }} BYN</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Hall:</span>
+                <span class="info-value">{{ exhibition.hall.name }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">Code:</span>
+                <span class="info-value">{{ exhibition.code }}</span>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            {% if user.is_authenticated and not user.is_staff and not user.is_superuser %}
+                <form action="{% url 'add_to_cart' exhibition.id %}" method="post" class="add-to-cart-form">
+                    {% csrf_token %}
+                    <button type="submit" class="add-to-cart-btn">
+                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                    </button>
+                </form>
+            {% endif %}
+            
+            <a href="{% url 'exhibitions' %}" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Exhibitions
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

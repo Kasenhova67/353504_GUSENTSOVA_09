@@ -1,0 +1,188 @@
+{% extends 'layout.html' %}
+
+{% block title %}Policy{% endblock %}
+
+{% block content %}
+<div class="policy-section">
+    <h2>7. Графическое представление функции</h2>
+    <p>Ниже представлены два графика, построенные с помощью библиотеки <a href="https://www.chartjs.org/" target="_blank">Chart.js</a>:</p>
+    <ul>
+        <li>График по данным разложения функции в ряд</li>
+        <li>График по значению функции, вычисленному через модуль Math</li>
+    </ul>
+    <canvas id="functionChart" width="800" height="400"></canvas>
+    <button onclick="saveChart()">Сохранить график</button>
+</div>
+
+
+<div class="policy-container">
+    {% if weather_data %}
+        <div class="weather-widget">
+            <h2>Погода в {{ weather_data.city }}</h2>
+            <div class="weather-content">
+                <img src="https://openweathermap.org/img/wn/{{ weather_data.icon }}@2x.png" 
+                     alt="{{ weather_data.description }}" width="60">
+                <div>
+                    <p class="weather-temp">{{ weather_data.temp }}°C</p>
+                    <p style="text-transform: capitalize;">{{ weather_data.description }}</p>
+                </div>
+            </div>
+            <div class="weather-details">
+                <p>Влажность: {{ weather_data.humidity }}%</p>
+                <p>Ветер: {{ weather_data.wind }} м/с</p>
+            </div>
+        </div>
+    {% endif %}
+
+    <h1 class="policy-title">Политика конфиденциальности</h1>
+    
+    <div class="policy-section">
+        <h2>1. Сбор информации</h2>
+        <p>Наш музей собирает следующую информацию:</p>
+        <ul>
+            <li>Данные о погоде через OpenWeatherMap API для информирования посетителей</li>
+            <li>Анонимные данные о посещаемости страниц сайта</li>
+            <li>Информацию, предоставленную добровольно при заполнении форм обратной связи</li>
+        </ul>
+    </div>
+
+    <div class="policy-section">
+        <h2>2. Использование информации</h2>
+        <p>Собранная информация используется для:</p>
+        <ul>
+            <li>Предоставления актуальной информации о погодных условиях для планирования посещения</li>
+            <li>Улучшения работы сайта и услуг музея</li>
+            <li>Ответа на запросы и вопросы посетителей</li>
+        </ul>
+    </div>
+
+    <div class="policy-section">
+        <h2>3. Защита данных</h2>
+        <p>Мы принимаем соответствующие меры безопасности для защиты вашей информации:</p>
+        <ul>
+            <li>Данные о погоде кэшируются и не содержат персональной информации</li>
+            <li>Все данные передаются по защищенному соединению HTTPS</li>
+            <li>Доступ к информации имеют только уполномоченные сотрудники музея</li>
+        </ul>
+    </div>
+
+    <div class="policy-section">
+        <h2>4. Погодные данные</h2>
+        <p>Погодная информация предоставляется сервисом OpenWeatherMap API и включает:</p>
+        <ul>
+            <li>Температуру воздуха</li>
+            <li>Атмосферные условия</li>
+            <li>Влажность и скорость ветра</li>
+            <li>Город местоположения музея</li>
+        </ul>
+        <p>Эти данные используются исключительно в информационных целях.</p>
+    </div>
+
+    <div class="policy-section">
+        <h2>5. Изменения в политике</h2>
+        <p>Мы оставляем за собой право вносить изменения в настоящую политику конфиденциальности. 
+           Актуальная версия всегда доступна на этой странице.</p>
+    </div>
+
+    <div class="policy-section">
+        <h2>6. Контакты</h2>
+        <p>По вопросам конфиденциальности обращайтесь:</p>
+        <div class="contacts-info">
+            <p>Email: privacy@museum-domain.com<br>
+               Телефон: +375 (44) 567-56-47<br>
+               Адрес: пер.Козлова 153</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  
+  const xValues = [];
+  const seriesValues = [];
+  const mathValues = [];
+
+  for (let x = -1; x <= 1; x += 0.1) {
+    x = parseFloat(x.toFixed(2));
+    xValues.push(x);
+
+    let seriesSum = 0;
+    const terms = 10;
+    for (let n = 0; n < terms; n++) {
+      const numerator = factorial(2 * n);
+      const denominator = Math.pow(4, n) * Math.pow(factorial(n), 2) * (2 * n + 1);
+      seriesSum += (numerator / denominator) * Math.pow(x, 2 * n + 1);
+    }
+    seriesValues.push(seriesSum);
+
+    mathValues.push(Math.asin(x));
+  }
+
+  const ctx = document.getElementById("functionChart").getContext("2d");
+  const chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: xValues,
+      datasets: [
+        {
+          label: "Разложение в ряд",
+          data: seriesValues,
+          borderColor: "blue",
+          fill: false,
+          tension: 0.3
+        },
+        {
+          label: "Math.asin(x)",
+          data: mathValues,
+          borderColor: "red",
+          fill: false,
+          tension: 0.3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: "top" },
+        title: {
+          display: true,
+          text: "Сравнение разложения arcsin(x) и Math.asin(x)"
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `x=${context.label}, y=${context.formattedValue}`;
+            }
+          }
+        }
+      },
+      animation: {
+        duration: 5000,
+        easing: "linear"
+      },
+      scales: {
+        x: {
+          title: { display: true, text: "x" }
+        },
+        y: {
+          title: { display: true, text: "F(x)" }
+        }
+      }
+    }
+  });
+
+  window.saveChart = function() {
+    const link = document.createElement("a");
+    link.download = "chart.png";
+    link.href = document.getElementById("functionChart").toDataURL("image/png");
+    link.click();
+  };
+
+  function factorial(n) {
+    return n <= 1 ? 1 : n * factorial(n - 1);
+  }
+});
+</script>
+{% endblock %}

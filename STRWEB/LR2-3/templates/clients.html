@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <h1>Our clients</h1>
+    
+    {% for client in clients %}
+        <div>
+            <p>Client's name: {{ client.user.last_name }} {{ client.user.first_name }}</p>
+            <p>Client's email: {{ client.user.email }}</p>
+            <p>Client's phone: {{ client.user.telephone }}</p>
+            <p>Client's company: {{ client.company_name }}</p>
+            <a href="{{ client.user.get_absolute_url_for_delete }}">Delete</a>
+        </div>
+    {% endfor %}
+{% endblock %}
